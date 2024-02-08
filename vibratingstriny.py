@@ -1,6 +1,6 @@
 
 """ 
-Vibrating string  problem of Set I, Scientific computing I
+Vibrating string with 1D wave equation. With L = 1 and c = 1 problem of Set I, Scientific computing I
 Need to add the 0 conditions
 """
 import numpy as np
@@ -11,98 +11,105 @@ from scipy.sparse import csr_array
 
 PLOT = False
 ANIMATION = True
-FUNCTION = 2
 
-N = 10000
+STEP_PLOT = 500
+SAVE_ANIMATION = False
+
+N = 100
 TAO = 0.001
+TOTAL_TIME = 100
 
 def initial_cte(N,L = 1):
     """
     Given an initial conditions equations, it returns all the points
     Inputs:
-        - N: Number of points
-        - L = Length of the rope
+        - N: Number intervals
     """
-    h = L/N
-    x = np.linspace(0,1,N)
+    x = np.linspace(0,L,N+1)
 
-    return np.sin(FUNCTION*np.pi*x),x
+    return np.sin(2*np.pi*(x)),x
 
 
-def matrix_A(N, tao = TAO):
+def matrix_A(N, tao = TAO, L = 1):
     """
-    Given a number of points, creates teh matrix A of shape N,N
+    Given a number of points, creates the matrix A of shape N,N
     Input:
-        - N: Number of points
+        - N: Number of intervals
         - Tao: Number of steps
     """
 
-    h = 1/N
-    diagonals = [np.full(N-3, tao**2),np.full(N-2, 2*h**2 - 2*tao**2), np.full(N-3, tao**2)]
+    h = L/N
+    diagonals = [np.full(N-2, (tao**2)/(h**2)),np.full(N-1, 2 - (2*tao**2)/(h**2)), np.full(N-2, (tao**2)/(h**2))]
     A = diags(diagonals , [-1, 0, 1])
     A = A.toarray()
-    A = (tao**2)/(h**2)*A
+    A = A
     
     return A
 
 
-def time_stepping_plots(N,tao = TAO, steps = 10000, plot = True):
+
+def time_stepping(N,tao = TAO, steps = TOTAL_TIME/TAO, plot = True):
     """
     Does the stepping scheme over time
     """
-    y_tb = np.zeros(N)
+    y_ta = np.zeros(N+1)
     y_to,x = initial_cte(N)
-    A = matrix_A(N,tao)
+    y_tb = y_to
+    A = matrix_A(N)
     time_step = 0
+    plt.plot(x,y_to, label = time_step)
 
     while True:
-        plt.plot(x,y_to)
         y_ta[1:-1] = A@y_to[1:-1] - y_tb[1:-1]
         y_tb[1:-1] = y_to[1:-1]
         y_to[1:-1] = y_ta[1:-1]
         time_step += 1
+
+        if (time_step%STEP_PLOT) == 0:
+            plt.plot(x,y_to, label = f"Time = {0.001*time_step}")
         if time_step >= steps:
             break
+    plt.legend()
+    plt.show()
 
-def time_step_an(interval):
-
-    global y_tb
-    global y_to
+def step(interval):
     global y_ta
+    global y_to
+    global y_tb
     global x
-    global A
 
-    y_ta[1:-1] = A@y_to[1:-1] - y_tb[1:-1]
-    y_tb[1:-1] = y_to[1:-1]
-    y_to[1:-1] = y_ta[1:-1]
+    for _ in range(STEP_PLOT):
+        y_ta[1:-1] = A@y_to[1:-1] - y_tb[1:-1]
+
+        y_tb[1:-1] = y_to[1:-1]
+
+        y_to[1:-1] = y_ta[1:-1]
+    
     ax.clear()
-    ax.set_ylim(-1.2,1.2)
+    ax.set_ylim(-1.5,1.5)
+    ax.set_title(f'Step {interval*STEP_PLOT*TAO}')
     ax.plot(x,y_to)
-    
-    
 
-
+    
 if __name__ == "__main__":
 
     if PLOT == True:
-        time_stepping_plot(N)
+        time_stepping(N)
 
     elif ANIMATION == True:
 
+
         fig, ax = plt.subplots()
 
-        ## PLots
-        ax.set_title(f"1-D Wave equation")
-
-        ## intial data
-
-        y_tb = np.zeros(N)
+        y_ta = np.zeros(N+1)
         y_to,x = initial_cte(N)
-        y_ta = np.zeros(N)
+        y_tb = y_to
+       
         A = matrix_A(N)
         ax.plot(x,y_to)
-        print(A)
-        print(y_to)
-        animation = animation.FuncAnimation(fig, time_step_an, frames=1000, interval=200, blit=False)
+
+        anim = animation.FuncAnimation(fig,step, frames=int(10_000), interval=0.001, blit=False)
+        if SAVE_ANIMATION == True:
+             anim.save('wave_animation.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
         plt.show()
 
