@@ -1,6 +1,7 @@
 
 """ 
 Vibrating string  problem of Set I, Scientific computing I
+Need to add the 0 conditions
 """
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,7 +13,7 @@ PLOT = False
 ANIMATION = True
 FUNCTION = 2
 
-N = 1000
+N = 10000
 TAO = 0.001
 
 def initial_cte(N,L = 1):
@@ -25,7 +26,8 @@ def initial_cte(N,L = 1):
     h = L/N
     x = np.linspace(0,1,N)
 
-    return np.sin(FUNCTION*np.pi*x), x
+    return np.sin(FUNCTION*np.pi*x),x
+
 
 def matrix_A(N, tao = TAO):
     """
@@ -36,7 +38,7 @@ def matrix_A(N, tao = TAO):
     """
 
     h = 1/N
-    diagonals = [np.ones(N-1),np.full(N, 2*h**2 -2), np.ones(N-1)]
+    diagonals = [np.full(N-3, tao**2),np.full(N-2, 2*h**2 - 2*tao**2), np.full(N-3, tao**2)]
     A = diags(diagonals , [-1, 0, 1])
     A = A.toarray()
     A = (tao**2)/(h**2)*A
@@ -55,23 +57,24 @@ def time_stepping_plots(N,tao = TAO, steps = 10000, plot = True):
 
     while True:
         plt.plot(x,y_to)
-        y_ta = A@y_to - y_tb
-        y_tb = y_to
-        y_to = y_ta
+        y_ta[1:-1] = A@y_to[1:-1] - y_tb[1:-1]
+        y_tb[1:-1] = y_to[1:-1]
+        y_to[1:-1] = y_ta[1:-1]
         time_step += 1
         if time_step >= steps:
             break
 
 def time_step_an(interval):
+
     global y_tb
     global y_to
     global y_ta
     global x
     global A
 
-    y_ta = A@y_to - y_tb
-    y_tb = y_to
-    y_to = y_ta
+    y_ta[1:-1] = A@y_to[1:-1] - y_tb[1:-1]
+    y_tb[1:-1] = y_to[1:-1]
+    y_to[1:-1] = y_ta[1:-1]
     ax.clear()
     ax.set_ylim(-1.2,1.2)
     ax.plot(x,y_to)
@@ -98,7 +101,8 @@ if __name__ == "__main__":
         y_ta = np.zeros(N)
         A = matrix_A(N)
         ax.plot(x,y_to)
-
-        animation = animation.FuncAnimation(fig, time_step_an, frames=100, interval=200, blit=False)
+        print(A)
+        print(y_to)
+        animation = animation.FuncAnimation(fig, time_step_an, frames=1000, interval=200, blit=False)
         plt.show()
-        
+
