@@ -19,6 +19,8 @@ N = 100
 TAO = 0.001
 TOTAL_TIME = 100
 
+SHIFT = 10**4
+
 def initial_cte(N,L = 1):
     """
     Given an initial conditions equations, it returns all the points
@@ -39,7 +41,8 @@ def matrix_A(N, tao = TAO, L = 1):
     """
 
     h = L/N
-    diagonals = [np.full(N-2, (tao**2)/(h**2)),np.full(N-1, 2 - (2*tao**2)/(h**2)), np.full(N-2, (tao**2)/(h**2))]
+    r = (tao**2)/(h**2)
+    diagonals = [np.full(N-2, r),np.full(N-1, 2 - 2*r), np.full(N-2, r)]
     A = diags(diagonals , [-1, 0, 1])
     A = A.toarray()
     A = A
@@ -60,7 +63,9 @@ def time_stepping(N,tao = TAO, steps = TOTAL_TIME/TAO, plot = True):
     plt.plot(x,y_to, label = time_step)
 
     while True:
-        y_ta[1:-1] = A@y_to[1:-1] - y_tb[1:-1]
+        A_ = A@y_to[1:-1]*SHIFT
+        b = -y_tb[1:-1]*SHIFT
+        y_ta[1:-1] = (A_+b)/SHIFT
         y_tb[1:-1] = y_to[1:-1]
         y_to[1:-1] = y_ta[1:-1]
         time_step += 1
@@ -79,7 +84,10 @@ def step(interval):
     global x
 
     for _ in range(STEP_PLOT):
-        y_ta[1:-1] = A@y_to[1:-1] - y_tb[1:-1]
+
+        A_ = A@(y_to[1:-1]*SHIFT)
+        b = -y_tb[1:-1]*SHIFT
+        y_ta[1:-1] = (A_+b)/SHIFT
 
         y_tb[1:-1] = y_to[1:-1]
 
