@@ -20,6 +20,7 @@ TAO = 0.001
 TOTAL_TIME = 100
 
 
+
 def initial_cte(N,L = 1):
     """
     Given an initial conditions equations, it returns all the points
