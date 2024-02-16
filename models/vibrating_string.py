@@ -40,6 +40,7 @@ class Vibrating_string:
         It creates the initial conditions
         """
         self.x = np.linspace(0,self.L,self.N+1)
+        self.y_o = np.zeros(self.N +1)
        
         if self.mode == 1:
             self.y_o = np.sin(2*np.pi*self.x)
@@ -50,8 +51,8 @@ class Vibrating_string:
             self.y = self.y_o
 
         elif self.mode ==3:
-            self.y_o = np.sin(5*np.pi*self.x)
-            self.y_o = 0
+            pos = ((1/5) < self.x) & ((2/5)> self.x)
+            self.y_o[pos] = np.sin(5 * np.pi * self.x[pos])
             self.y = self.y_o
 
 
@@ -81,7 +82,7 @@ class Vibrating_string:
         """
         Does the stepping scheme over time and plots every "step_plot"
         Inputs:
-            -   step_plot: How many iterations between plots, 1000 by default
+            -   step_plot: How many iterations between plots, 100 by default
         """
         self.y_new = np.zeros(self.N+1)
         self.y_old = np.copy(self.y_o)
@@ -89,33 +90,34 @@ class Vibrating_string:
         for time_step in range(self.n_steps):
             self.step()
             if (time_step%step_plot) == 0:
-                plt.plot(self.x,self.y, label = f"Time = {0.001*time_step}")
+                plt.plot(self.x,self.y, label = f"Time = {self.tao*time_step}")
 
         plt.title("Vibrating string simulation")
-        plt.legend()
         plt.show()
 
 
 
-    def animation(self,step_anim = 10_000,save_animation = False):
+    def animation(self,save_animation = False):
         """
-        Animates teh stepping shceme:
+        Animates the stepping shceme:
         Inputs:
             -   save_animation: True == it will save the animation, default is False
         """
         fig, ax = plt.subplots()
         self.y_new = np.zeros(self.N+1)
-
         self.y_old =np.copy(self.y_o)       
 
         ax.plot(self.x,self.y_o)
 
-        anim = animation.FuncAnimation(fig,self.frame, fargs= (ax,), frames=int(self.n_steps), interval = 0.1)
+        anim = animation.FuncAnimation(fig,self.frame, fargs= (ax,), frames=int(self.n_steps), interval = 0.0001)
         plt.show()
 
         if save_animation == True:
             anim.save('sin_wave_animation.mp4', fps=30)
             plt.close()
+        
+
+    
 
     def frame(self, iteration, ax):
         self.step()
@@ -128,7 +130,7 @@ class Vibrating_string:
 
     
 if __name__ == "__main__":
-    string = Vibrating_string(1,1000,100)
-    string.animation()
+    string = Vibrating_string(3,100,100)
+    a = string.animation()
 
 
