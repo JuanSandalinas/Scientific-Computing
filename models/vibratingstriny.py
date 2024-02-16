@@ -9,111 +9,126 @@ import matplotlib.animation as animation
 from scipy.sparse import diags
 from scipy.sparse import csr_array
 
-PLOT = True
-ANIMATION = False
 
-STEP_PLOT = 1
-SAVE_ANIMATION = True
-
-N = 100
-TAO = 0.001
-TOTAL_TIME = 100
-
-
-
-def initial_cte(N,L = 1):
+class Vibrating_string:
     """
-    Given an initial conditions equations, it returns all the points
+    Vibrating string  class:
     Inputs:
-        - N: Number intervals
-    """
-    x = np.linspace(0,L,N+1)
-
-    return np.sin(2*np.pi*(x)),x
-
-
-def matrix_A(N, tao = TAO, L = 1, c = 1):
-    """
-    Given a number of points, creates the matrix A of shape N,N
-    Input:
+        - mode: mode == 1 uses sin(2*pi*x), mode == 2 uses sin(5*pi*x), mode == 3 uses sin
         - N: Number of intervals
-        - Tao: Number of steps
+        - T: Total time of the simulation in seconds (s)
     """
 
-    h = L/N
-    r = (c*tao/h)**2
-    diagonals = [np.full(N-2, r),np.full(N-1, 2 - 2*r), np.full(N-2, r)]
-    A = diags(diagonals , [-1, 0, 1])
-    A = A.toarray()
-    
-    return A
+    def __init__(self,mode, N, T, L = 1, tao = 0.001, c = 1, auto = True):
+        self.mode = mode
+        
+        self.N = N
+        self.T = T
+        self.L = L
+        self.tao = tao
+        self.c = c
 
+        self.h =L/N
+        self.n_steps = int(T/tao)
 
+        if auto == True:
+            self.initial_cte()
+            self.iteration_matrix()
 
-def time_stepping(N,tao = TAO, steps = TOTAL_TIME/TAO, plot = True):
-    """
-    Does the stepping scheme over time
-    """
-    y_new = np.zeros(N+1)
-    y,x = initial_cte(N)
-    y_old = np.copy(y)
-    A = matrix_A(N)
-    plt.plot(x,y, label = time_step)
-
-
-    for time_step in range(steps):
-
-        A_ = A@y[1:-1]
-        b = -y_old[1:-1]
-        y_new[1:-1] = (A_+b)
-        y_old[1:-1] = np.copy(y[1:-1])
-        y[1:-1] = np.copy(y_new[1:-1])
-
-
-        if (time_step%STEP_PLOT) == 0:
-            plt.plot(x,y, label = f"Time = {0.001*time_step}")
+    def initial_cte(self):
+        """
+        It creates the initial conditions
+        """
+        self.x = np.linspace(0,self.L,self.N+1)
        
+        if self.mode == 1:
+            self.y_o = np.sin(2*np.pi*self.x)
+            self.y = self.y_o
+            
+        elif self.mode == 2:
+            self.y_o = np.sin(5*np.pi*self.x)
+            self.y = self.y_o
+
+        elif self.mode ==3:
+            self.y_o = np.sin(5*np.pi*self.x)
+            self.y_o = 0
+            self.y = self.y_o
 
 
-def step(interval):
-    global y_new
-    global y
-    global y_old
-    global x
+    def iteration_matrix(self):
+        """
+        Creates the iteration matrix A.
+        """
 
-    for _ in range(STEP_PLOT):
-        b = -y_old[1:-1]
-        y_new[1:-1] = A@y[1:-1] + b
+        r = (self.c*self.tao/self.h)**2
+        diagonals = [np.full(self.N-2, r),np.full(self.N-1, 2 - 2*r), np.full(self.N-2, r)]
+        self.A = diags(diagonals , [-1, 0, 1])
 
-        y_old[1:-1] = np.copy(y[1:-1])
+    def step(self):
+        """ 
+        Stepping scheme int two steps:
+            1. Iterates in the form y(t+1) = A*y(t) - y(t-1)
+            2. Moves to next time t, y(t-1) = y(t), and y(t) = y(t+1)
+        Note:
+            - Iteration are done without including the boundaries since they are 0
+        """
+        self.y_new[1:-1] = self.A@self.y[1:-1] - self.y_old[1:-1]
+        self.y_old[1:-1] = self.y[1:-1]
+        self.y[1:-1] = self.y_new[1:-1]
 
-        y[1:-1] = np.copy(y_new[1:-1])
     
-    ax.clear()
-    ax.set_ylim(-1.5,1.5)
-    ax.set_title(f'Time_ {np.round(interval*STEP_PLOT*TAO,2)}')
-    ax.plot(x,y)
+    def plotter(self,step_plot = 100):
+        """
+        Does the stepping scheme over time and plots every "step_plot"
+        Inputs:
+            -   step_plot: How many iterations between plots, 1000 by default
+        """
+        self.y_new = np.zeros(self.N+1)
+        self.y_old = np.copy(self.y_o)
+
+        for time_step in range(self.n_steps):
+            self.step()
+            if (time_step%step_plot) == 0:
+                plt.plot(self.x,self.y, label = f"Time = {0.001*time_step}")
+
+        plt.title("Vibrating string simulation")
+        plt.legend()
+        plt.show()
+
+
+
+    def animation(self,step_anim = 10_000,save_animation = False):
+        """
+        Animates teh stepping shceme:
+        Inputs:
+            -   save_animation: True == it will save the animation, default is False
+        """
+        fig, ax = plt.subplots()
+        self.y_new = np.zeros(self.N+1)
+
+        self.y_old =np.copy(self.y_o)       
+
+        ax.plot(self.x,self.y_o)
+
+        anim = animation.FuncAnimation(fig,self.frame, fargs= (ax,), frames=int(self.n_steps), interval = 0.1)
+        plt.show()
+
+        if save_animation == True:
+            anim.save('sin_wave_animation.mp4', fps=30)
+            plt.close()
+
+    def frame(self, iteration, ax):
+        self.step()
+        ax.clear()
+        ax.set_ylim(-1.5,1.5)
+        ax.set_title(f'Time: {np.round(iteration*self.tao,6)}')
+        ax.plot(self.x,self.y)
+
+
 
     
 if __name__ == "__main__":
-
-    if PLOT == True:
-        time_stepping(N)
-
-    elif ANIMATION == True:
-
-        fig, ax = plt.subplots()
-
-        y_new = np.zeros(N+1)
-        y,x = initial_cte(N)
-        y_old =np.copy(y)       
-        A = matrix_A(N)
-        ax.plot(x,y)
-
-        anim = animation.FuncAnimation(fig,step, frames=int(10_00), interval=0.001, blit=False)
-
-        if SAVE_ANIMATION == True:
-            anim.save('sin_wave_animation.mp4', fps=30)
-            plt.close()
+    string = Vibrating_string(1,1000,100)
+    string.animation()
 
 
