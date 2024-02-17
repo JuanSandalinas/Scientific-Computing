@@ -99,7 +99,7 @@ class Vibrating_string:
 
     def animation(self,save_animation = False):
         """
-        Animates the stepping shceme:
+        Animates the stepping scheme:
         Inputs:
             -   save_animation: True == it will save the animation, default is False
         """
@@ -109,7 +109,7 @@ class Vibrating_string:
 
         ax.plot(self.x,self.y_o)
 
-        anim = animation.FuncAnimation(fig,self.frame, fargs= (ax,), frames=int(self.n_steps), interval = 0.0001)
+        anim = animation.FuncAnimation(fig,self.frame, fargs= (ax,), frames=int(self.n_steps), interval = 0.001)
         plt.show()
 
         if save_animation == True:
@@ -128,9 +128,8 @@ class Vibrating_string:
 
 
 
-    
 if __name__ == "__main__":
-    string = Vibrating_string(3,100,100)
+    string = Vibrating_string(2,100,100)
     a = string.animation()
 
 
