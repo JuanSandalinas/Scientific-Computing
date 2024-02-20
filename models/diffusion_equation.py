@@ -3,7 +3,9 @@ import math
 import matplotlib.pyplot as plt
 from scipy.sparse import diags
 from scipy.sparse import csr_matrix
-#from methods import jacobi
+
+if __name__ == "__main__":
+    from methods import jacobi, sor, gauss_seidel
 
 
 class SimulationGrid:

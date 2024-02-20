@@ -6,7 +6,7 @@ from scipy import special as sp
 import math
 
 
-def jacobi(C, stop,store_step = 10, object = None):
+def jacobi(C, stop = 0.0001,store_step = 10, object = None):
     """
     Jacobi method.
     Inputs:
@@ -44,7 +44,7 @@ def jacobi(C, stop,store_step = 10, object = None):
     
 
 
-def gauss_seidel(C, stop,store_step = 10, object = None):
+def gauss_seidel(C, stop = 0.0001,store_step = 10, object = None):
     """
     Performs Gauss Seidel iterations
     Inputs:
@@ -69,7 +69,7 @@ def gauss_seidel(C, stop,store_step = 10, object = None):
             yield C
 
 
-def sor(C,w,stop = 0.001,store_step = 10, object = None):
+def sor(C,w,stop = 0.0001,store_step = 10, object = None):
     """
     Performs Successive over relaxation.
     Inputs:
