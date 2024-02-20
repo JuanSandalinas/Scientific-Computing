@@ -1,6 +1,7 @@
 import numpy as np
 import math
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 from scipy.sparse import diags
 from scipy.sparse import csr_matrix
 
@@ -24,6 +25,7 @@ class SimulationGrid:
         self.initialize()
 
 
+
     def initialize(self):
         """
         Initializes matrix with all all 0 concentrations except 1 on first row
@@ -42,10 +44,43 @@ class SimulationGrid:
             - store_step: Every how many steps store data
         """
         self.data = [self.A]
-        A = np.copy(self.A)
-        for A_t in method_fun(A,*args,**kwargs):
-            self.data.append(A_t)
+        C = np.copy(self.A)
+        n_count = 0
+        for A_t in method_fun(C,*args,**kwargs):
+            self.data.append(np.copy(A_t))
+    
+    def time_dependent_matrix(self):
+        """
+        Creates the matrices for time dependent difference scheme
+        """
 
+        diagonals = [np.ones(self.N), np.ones(self.N)]
+        
+        M1 = diags(diagonals , [-1, 1])
+        M2 = diags(diagonals, [-1,1]).toarray()
+
+        ## Cyclic boundary conditions
+        M2[-2,0] = 1
+        M2[1,-1] = 1
+
+        ## Periodic boundary conditions
+        
+        self.M1 = M1
+        self.M2 = M2
+
+    def time_dependent_step(self,C):
+        """
+        Does on step of the time dependent difference scheme
+        Inputs:
+            - C: Matrix C, which is A over time
+        Outputs:
+            - C: Matrix C after one step
+        """
+        c1=  self.M1@C
+        c2 = C@self.M2
+        C[1:-1] = (C + self.term*(c1 + c2 - 4*C))[1:-1]
+        return C
+    
 
     
     def time_dependent(self,t,dt = 0.0001, time_list = [0,0.001,0.01,0.1,1.0]):
@@ -57,33 +92,20 @@ class SimulationGrid:
             - time_list: times to store
         """
         self.data = [self.A]
-        term = (dt*self.D)/(self.dx**2)
+        self.term = (dt*self.D)/(self.dx**2)
+        self.time_dependent_matrix()
 
-        if 4*term > 1:
+        if 4*self.term > 1:
             raise Exception ("Not stable system")
 
         C = np.copy(self.A)
         n_steps = int(t/dt)
 
-        ## Matrix operations
-        diagM1 = [term*np.ones(self.N),np.ones(self.N+1),term*np.ones(self.N)]
-        diagM2 = [term*np.ones(self.N),np.full(self.N+1,-4*term),term*np.ones(self.N)]
-
-        M1 = diags(diagM1 , [-1, 0,1], format = "csr")
-        M2 = diags(diagM2, [-1,0,1], format = "csr")
-
-        ## Periodic boundary conditions
-        M2[-2,0] = 1
-        M2[1,-1] = 1
-
 
         for k in range(n_steps):
-            c1=  M1@C
-            c2 = C@M2
-            C[1:-1] = (c1+c2)[1:-1]
+            C = self.time_dependent_step(C)
             if k*dt in time_list:
-                print(k*dt)
-                self.data.append(C)
+                self.data.append(np.copy(C))
 
 
     def c_analytical(self,t, i_max=100):
@@ -104,18 +126,44 @@ class SimulationGrid:
             lst.append(result)
         return np.array(lst)
 
+    def animation(self,t = 1,dt = 0.0001,save_animation = False):
+        """
+        Animates the stepping scheme:
+        Inputs:
+            -   t: Total animation time
+            -   dt: Time stepping size
+            -   save_animation: True == it will save the animation, default is False
+        """
+        fig, ax = plt.subplots()       
+        C = np.copy(self.A)
+        self.time_dependent_matrix()
+        self.term = (dt*self.D)/(self.dx**2)
+        
+        n_steps = t/dt
+        C = np.copy(self.A)
+        
+        ax.imshow(C, cmap='hot', interpolation='nearest', extent=[0, 1, 0, 1])
+        ax.set_xlabel('X')  
+        ax.set_ylabel('Y')  
+        ax.set_title('Time: 0 s') 
+        
+        anim = animation.FuncAnimation(fig,self.frame, fargs= (ax, C), frames=int(n_steps), interval = 0.00001)
+        plt.show()
+
+        if save_animation == True:
+            anim.save('time_diffusion_animation.mp4', fps=30)
+            plt.close()
+
+    def frame(self, iteration, ax, C):
+        C = self.time_dependent_step(C)
+        ax.clear()
+        ax.set_title(f'Time: {np.round(iteration*0.0001)} s')
+        ax.imshow(C, cmap='hot', interpolation='nearest', extent=[0, 1, 0, 1])
+
 
  
 if __name__ == "__main__":
     dif = SimulationGrid(50)
-    y_input = np.arange(0,1,51)
-    time_show = [0,0.001, 0.01, 0.1, 1] 
-    dt = 0.00001
-    dif.time_dependent(t = 1, dt = dt,time_list = time_show)
-    for i,d in enumerate(dif.data):
-        text = f"Time dependent - t = {time_show[i]}"
-        plt.plot(d[::-1,1],label=text)
-        plt.legend()
-    plt.show()
+    dif.animation()
 
     
