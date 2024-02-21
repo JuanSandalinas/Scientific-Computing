@@ -6,7 +6,7 @@ from scipy import special as sp
 import math
 
 
-def jacobi(C, stop = 0.0001,store_step = 10, object = None):
+def jacobi(C,object_, stop = 0.00001,store_step = 10, object = None):
     """
     Jacobi method.
     Inputs:
@@ -28,13 +28,13 @@ def jacobi(C, stop = 0.0001,store_step = 10, object = None):
     M2[1,-1] = 1
 
     n_count = 0
-
+    non_cte = np.where(object_ == 0)
     while True:
         n_count += 1
         C_b = np.copy(C)
         c1=  M1@C
         c2 = C@M2
-        C[1:-1] = (1/4 *(c1+c2))[1:-1]
+        C[non_cte[0],non_cte[1]] = (1/4 *(c1+c2))[non_cte[0],non_cte[1]]
 
         if np.allclose(C, C_b, atol=stop):
             yield C
@@ -44,23 +44,33 @@ def jacobi(C, stop = 0.0001,store_step = 10, object = None):
     
 
 
-def gauss_seidel(C, stop = 0.0001,store_step = 10, object = None):
+def gauss_seidel(C, object_,stop = 0.0001,store_step = 1):
     """
     Performs Gauss Seidel iterations
     Inputs:
         - A: Matrix with initial conditions/positions
         - Stop: Stop criteria
+        - object: matrix that specifies which values need to be updated
     """
     w = 1/4
     n_count = 0
+    
+    non_cte = np.where(object_ == 0)
+   
     while True:
         n_count += 1 
         C_b = np.copy(C)
-        for i in range(1,C.shape[0]-1):
-            C[i,0] = w*(C[i+1,0] + C[i-1,0] + C[i,1] + C[i,-2])
-            for j in range(1,C.shape[1]-1):
-                C[i,j] = w*(C[i+1,j] + C[i-1,j] + C[i,j+1] + C[i,j-1])
-            C[i,-1] = w*(C[i+1,-1] + C[i-1,-1] + C[i,1] + C[i,-2])
+        for i in np.unique(non_cte[0]):
+            
+            for j in non_cte[1][non_cte[0] == i]:
+                if j == 0:
+                    C[i,0] = w*(C[i+1,0] + C[i-1,0] + C[i,1] + C[i,-2])
+                elif j == (C.shape[0]-1):
+                    C[i,-1] = w*(C[i+1,-1] + C[i-1,-1] + C[i,1] + C[i,-2])
+                else:
+                    C[i,j] = w*(C[i+1,j] + C[i-1,j] + C[i,j+1] + C[i,j-1])
+            
+            
 
         if np.allclose(C, C_b, atol=stop):
             yield C
@@ -69,7 +79,7 @@ def gauss_seidel(C, stop = 0.0001,store_step = 10, object = None):
             yield C
 
 
-def sor(C,w,stop = 0.0001,store_step = 10, object = None):
+def sor(C,object_,w,stop = 0.0001,store_step = 10):
     """
     Performs Successive over relaxation.
     Inputs:
@@ -78,12 +88,13 @@ def sor(C,w,stop = 0.0001,store_step = 10, object = None):
         - stop: simulation stopper
     """
     n_count = 0
+    non_cte = np.where(object == 0)
     while True:
         n_count += 1
         C_b = np.copy(C)
-        for i in range(1,C.shape[0]-1):
+        for i in np.unique(non_cte[0]):
             C[i,0] = w*(C[i+1,0] + C[i-1,0] + C[i,1] + C[i,-2]) + (1-w)*C[i,0]
-            for j in range(1,C.shape[1]-1):
+            for j in non_cte[1][np.where(non_cte[0] == i)]:
                 C[i,j] = (w/4)*(C[i+1,j] + C[i-1,j] + C[i,j+1] + C[i,j-1]) + (1-w)*C[i,j]
             C[i,-1] = w*(C[i+1,-1] + C[i-1,-1] + C[i,1] + C[i,-2]) + (1-w)*C[i,-1]
         
