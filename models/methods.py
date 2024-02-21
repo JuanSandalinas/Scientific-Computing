@@ -29,18 +29,19 @@ def jacobi(C,object_, stop = 0.00001,store_step = 10, object = None):
 
     n_count = 0
     non_cte = np.where(object_ == 0)
+    iteration = 0
     while True:
-        n_count += 1
+        iteration += 1
         C_b = np.copy(C)
         c1=  M1@C
         c2 = C@M2
         C[non_cte[0],non_cte[1]] = (1/4 *(c1+c2))[non_cte[0],non_cte[1]]
 
         if np.allclose(C, C_b, atol=stop):
-            yield C
+            yield (C, iteration)
             break
-        if n_count%store_step == 0:
-            yield C
+        if iteration%store_step == 0:
+            yield (C, iteration)
     
 
 
@@ -57,8 +58,9 @@ def gauss_seidel(C, object_,stop = 0.0001,store_step = 1):
     
     non_cte = np.where(object_ == 0)
    
+    iteration = 0
     while True:
-        n_count += 1 
+        iteration += 1 
         C_b = np.copy(C)
         for i in np.unique(non_cte[0]):
             
@@ -73,10 +75,10 @@ def gauss_seidel(C, object_,stop = 0.0001,store_step = 1):
             
 
         if np.allclose(C, C_b, atol=stop):
-            yield C
+            yield (C, iteration)
             break
-        if n_count%store_step == 0:
-            yield C
+        if iteration%store_step == 0:
+            yield (C, iteration)
 
 
 def sor(C,object_,w,stop = 0.0001,store_step = 10):
@@ -87,22 +89,23 @@ def sor(C,object_,w,stop = 0.0001,store_step = 10):
         - w: weight
         - stop: simulation stopper
     """
-    n_count = 0
     non_cte = np.where(object == 0)
+
+    iteration = 0
     while True:
-        n_count += 1
+        iteration += 1
         C_b = np.copy(C)
         for i in np.unique(non_cte[0]):
             C[i,0] = w*(C[i+1,0] + C[i-1,0] + C[i,1] + C[i,-2]) + (1-w)*C[i,0]
             for j in non_cte[1][np.where(non_cte[0] == i)]:
                 C[i,j] = (w/4)*(C[i+1,j] + C[i-1,j] + C[i,j+1] + C[i,j-1]) + (1-w)*C[i,j]
             C[i,-1] = w*(C[i+1,-1] + C[i-1,-1] + C[i,1] + C[i,-2]) + (1-w)*C[i,-1]
-        
+   
         if np.allclose(C, C_b, atol=stop):
-            yield C
+            yield (C, iteration)
             break
-        if n_count%store_step == 0:
-            yield C
+        if iteration%store_step == 0:
+            yield (C, iteration)
     
 
 
