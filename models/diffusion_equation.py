@@ -60,12 +60,43 @@ class SimulationGrid:
             - store_step: Every how many steps store data
         """
         self.data = [self.A]
-        self.iterations = []
-        A = np.copy(self.A)
-        for A_t in method_fun(A,*args,**kwargs):
-            self.data.append(A_t[0].copy())
-            self.iterations.append(A_t[1])
+        C = np.copy(self.A)
+        n_count = 0
+        for A_t in method_fun(C, object_ = self.object_,stop = 0.00001,*args,**kwargs):
+            self.data.append(np.copy(A_t))
+    
+    def time_dependent_matrix(self):
+        """
+        Creates the matrices for time dependent difference scheme
+        """
 
+        diagonals = [np.ones(self.N), np.ones(self.N)]
+        
+        M1 = diags(diagonals , [-1, 1])
+        M2 = diags(diagonals, [-1,1]).toarray()
+
+        ## Cyclic boundary conditions
+        M2[-2,0] = 1
+        M2[1,-1] = 1
+
+        ## Periodic boundary conditions
+        
+        self.M1 = M1
+        self.M2 = M2
+
+    def time_dependent_step(self,C):
+        """
+        Does on step of the time dependent difference scheme
+        Inputs:
+            - C: Matrix C, which is A over time
+        Outputs:
+            - C: Matrix C after one step
+        """
+        c1=  self.M1@C
+        c2 = C@self.M2
+        non_cte = np.where(self.object_ == 0)
+        C[non_cte[0],non_cte[1]] = (C + self.term*(c1 + c2 - 4*C))[non_cte[0],non_cte[1]]
+        return C
     
 
     
