@@ -62,8 +62,10 @@ class SimulationGrid:
         self.data = [self.A]
         C = np.copy(self.A)
         n_count = 0
-        for A_t in method_fun(C, object_ = self.object_,stop = 0.00001,*args,**kwargs):
-            self.data.append(np.copy(A_t))
+        self.iterations = []
+        for A_t in method_fun(C, object_ = self.object_, *args,**kwargs):
+            self.data.append(np.copy(A_t[0]))
+            self.iterations.append(A_t[1])
     
     def time_dependent_matrix(self):
         """

@@ -36,10 +36,10 @@ def jacobi(C,object_, stop = 0.00001,store_step = 10, object = None):
         C[non_cte[0],non_cte[1]] = (1/4 *(c1+c2))[non_cte[0],non_cte[1]]
 
         if np.allclose(C, C_b, atol=stop):
-            yield C
+            yield (C, n_count)
             break
         if n_count%store_step == 0:
-            yield C
+            yield (C, n_count)
     
 
 
@@ -72,36 +72,43 @@ def gauss_seidel(C, object_,stop = 0.0001,store_step = 1):
             
 
         if np.allclose(C, C_b, atol=stop):
-            yield C
+            yield (C, n_count)
             break
         if n_count%store_step == 0:
-            yield C
-
-
-def sor(C,object_,w,stop = 0.0001,store_step = 10):
+            yield (C, n_count)
+            
+            
+def sor(C, object_, w, stop = 0.0001,store_step = 1):
     """
     Performs Successive over relaxation.
     Inputs:
-        - A: Matrix A with all values
+        - C: Matrix C with all values
+        - object_: Matrix with information about which values to update
         - w: weight
         - stop: simulation stopper
+        - store_step: Step to store the results
     """
     n_count = 0
-    non_cte = np.where(object == 0)
+    non_cte = np.where(object_ == 0)
     while True:
-        n_count += 1
+        n_count += 1 
         C_b = np.copy(C)
         for i in np.unique(non_cte[0]):
-            C[i,0] = w*(C[i+1,0] + C[i-1,0] + C[i,1] + C[i,-2]) + (1-w)*C[i,0]
-            for j in non_cte[1][np.where(non_cte[0] == i)]:
-                C[i,j] = (w/4)*(C[i+1,j] + C[i-1,j] + C[i,j+1] + C[i,j-1]) + (1-w)*C[i,j]
-            C[i,-1] = w*(C[i+1,-1] + C[i-1,-1] + C[i,1] + C[i,-2]) + (1-w)*C[i,-1]
-        
+            for j in non_cte[1][non_cte[0] == i]:
+                if j == 0:
+                    C[i, 0] = (w/4)*(C[i+1, 0] + C[i-1, 0] + C[i, 1] + C[i, -2]) + (1-w)*C[i, 0]
+                elif j == (C.shape[0]-1):
+                    C[i, -1] = (w/4)*(C[i+1, -1] + C[i-1, -1] + C[i, 1] + C[i, -2]) + (1-w)*C[i, -1]
+                else:
+                    C[i, j] = (w/4)*(C[i+1, j] + C[i-1, j] + C[i, j+1] + C[i, j-1])+ (1-w)*C[i, j]
+
         if np.allclose(C, C_b, atol=stop):
-            yield C
+            yield (C, n_count)
             break
-        if n_count%store_step == 0:
-            yield C
+        if n_count % store_step == 0:
+            yield (C, n_count)
+
+         
 
 
 
