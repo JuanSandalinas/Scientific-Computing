@@ -1,0 +1,56 @@
+\section{Theory}
+\subsection{Discretization methods and finite differences}
+For the analysis of partial differential equations (PDEs) and ordinary differential equations(ODEs)
+numerical methods have shown to be a strong tool for the analysis of them. Among the different methods
+there exist the finite difference methods, on which the space is discretized on grid points,
+and the derivate are approximated with finite differences approximations. In a discretized space, with equidistant
+points at $h$ distance we obtain:
+
+
+\begin{enumerate}
+    \item First order methods:
+          \begin{itemize}
+              \item Forward first order differences:
+                    \begin{equation}
+                        \frac{df(x_{i})}{dx} \approx \frac{f(x_{i+1}) - f(x_{i})}{h}
+                    \end{equation}
+              \item Backward first order differences:
+                    \begin{equation}
+                        \frac{df(x_{i})}{dx} \approx \frac{f(x_i) - f(x_{i-1})}{h}
+                    \end{equation}
+              \item Centered first order differences:
+                    \begin{equation}
+                        \frac{df(x_{i})}{dx} \approx \frac{f(x_{i+1}) - f(x_{i-1})}{h}
+                    \end{equation}
+          \end{itemize}
+
+    \item Second order methods:
+          \begin{itemize}
+              \item Forward second order differences:
+                    \begin{equation}
+                        \frac{d^{2} f(x_{i})}{dx^2} \approx \frac{f(x_{i+2}) - 2f(x_{i+1}) + f(x_i)}{h^2}
+                    \end{equation}
+              \item Backward second order differences:
+                    \begin{equation}
+                        \frac{d^{2} f(x_{i})}{dx^2} \approx \frac{f(x_i) - 2f(x_{i-1}) + f(x_{i-2})}{h^2}
+                    \end{equation}
+              \item Centered second order differences:
+                    \begin{equation}
+                        \frac{d^{2} f(x_{i})}{dx^2} \approx \frac{f(x_{i+1}) - 2f(x_i) + f(x_{i-1})}{h^2}
+                    \end{equation}
+          \end{itemize}
+\end{enumerate}
+Where $i$ represent the position in space of the points ($x_{i} = h*i$).
+
+\subsection{The wave equation}
+Thw wave equation is a a partial deferential equation which describes the movement of waves, which cna be transpoort of voltage
+lossless transmission line. Among it possible dimension equation,
+in this project we describe the one dimensional wave-equation.
+
+\begin{equation}
+    \frac{d^{2} \psi}{dt^2} = c^{2} \cdot \frac{d^{2} \psi}{dx^2}
+\end{equation}
+
+On which, $\psi(x,t)$ is the the vibration amplitude, $c$ is $1/v$ of spread of the wave.
+
+\subsection{The time Dependent Diffusion equation}
