@@ -24,7 +24,7 @@ class SimulationGrid:
         self.N = N
         self.initialize()
         self.data = [self.A] #For simulations
-        self.data_especial = [self.A] #To store the time at 0.1,0.001,....
+        self.data_especial = [] #To store the time at 0.1,0.001,....
 
 
     def initialize(self):
@@ -51,7 +51,7 @@ class SimulationGrid:
         self.object_[position[0]:position[0]+size,position[1]:position[1]+size]  = np.ones((size, size))
         
 
-    def time_independent(self,method_fun,*args,**kwargs):
+    def time_independent(self,method_fun,stop = 0.00001,*args,**kwargs):
         """
         Executes a time_step ing method given a function
         Inputs:
@@ -62,7 +62,7 @@ class SimulationGrid:
         self.data = [self.A]
         C = np.copy(self.A)
         n_count = 0
-        for A_t in method_fun(C, object_ = self.object_,stop = 0.00001,*args,**kwargs):
+        for A_t in method_fun(*args, C=C,stop=stop,object_ = self.object_,**kwargs):
             self.data.append(np.copy(A_t))
     
     def time_dependent_matrix(self):
@@ -100,7 +100,7 @@ class SimulationGrid:
     
 
     
-    def time_dependent(self,t,dt = 0.00001, time_list = [0,0.001,0.01,0.1,1.0]):
+    def time_dependent(self,t,dt = 0.0001, time_list = [0.001,0.01,0.1,1.0]):
         """
         Does time dependent stepping scheme.
         Inputs:
@@ -121,9 +121,12 @@ class SimulationGrid:
 
         for k in range(n_steps):
             C = self.time_dependent_step(C)
-            if k%1000 == 0:
+            if k%20 == 0:
                 self.data.append(np.copy(C))
             if k*dt in time_list:
+                self.data_especial.append(np.copy(C))
+                print(k*dt)
+            if k == n_steps -1:
                 self.data_especial.append(np.copy(C))
 
 
@@ -145,7 +148,7 @@ class SimulationGrid:
             lst.append(result)
         return np.array(lst)
 
-    def animation(self,method,method_fun = None,t = 4,save_animation = False):
+    def animation(self,method,method_fun = None,t = 1.5,save_animation = False):
         """
         Animates the stepping scheme:
         Inputs:
@@ -170,25 +173,26 @@ class SimulationGrid:
         ax.set_ylabel('Y')  
         ax.set_title('Time: 0 s') 
         
-        anim = animation.FuncAnimation(fig,self.frame, fargs= (ax,), frames=int(n_steps), interval = 0.0000001)
-        plt.show()
+        anim = animation.FuncAnimation(fig,self.frame, fargs= (ax,), frames=int(n_steps), interval = 0.000000001)
 
         if save_animation == True:
-            anim.save('time_diffusion_animation.mp4', fps=30)
+            print("Starting ")
+            anim.save('time_dependent_diffusion_animation.mp4', fps=60)
             plt.close()
 
     def frame(self, iteration, ax):
         C = self.data[iteration]
         ax.clear()
-        ax.set_title(f'Time: {np.round(iteration*0.0001, 7)} s')
+        ax.set_title(f'Time dependent(t={np.round(iteration*0.0001*50, 7)}) s')
         ax.imshow(C, cmap='hot', interpolation='nearest', extent=[0, 1, 0, 1])
 
 
  
 if __name__ == "__main__": 
-    dif = SimulationGrid(100)
-    dif.square(40,[30,30])
-    dif.animation(method = "time_dependent")
+    dif = SimulationGrid(50)
+    dif.animation("time_dependent",save_animation=True)
+
+
         
  
 

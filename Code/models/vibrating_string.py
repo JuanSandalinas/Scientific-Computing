@@ -30,10 +30,12 @@ class Vibrating_string:
 
         self.h =L/N
         self.n_steps = int(T/tao)
+        self.data = []
 
         if auto == True:
             self.initial_cte()
             self.iteration_matrix()
+            self.time_stepping()
 
     def initial_cte(self):
         """
@@ -74,26 +76,15 @@ class Vibrating_string:
             - Iteration are done without including the boundaries since they are 0
         """
         self.y_new[1:-1] = self.A@self.y[1:-1] - self.y_old[1:-1]
+        self.data.append(np.copy(self.y_new))
         self.y_old[1:-1] = self.y[1:-1]
         self.y[1:-1] = self.y_new[1:-1]
-
     
-    def plotter(self,step_plot = 100):
-        """
-        Does the stepping scheme over time and plots every "step_plot"
-        Inputs:
-            -   step_plot: How many iterations between plots, 100 by default
-        """
+    def time_stepping(self):
         self.y_new = np.zeros(self.N+1)
         self.y_old = np.copy(self.y_o)
-
         for time_step in range(self.n_steps):
             self.step()
-            if (time_step%step_plot) == 0:
-                plt.plot(self.x,self.y, label = f"Time = {self.tao*time_step}")
-
-        plt.title("Vibrating string simulation")
-        plt.show()
 
 
 
@@ -109,27 +100,25 @@ class Vibrating_string:
 
         ax.plot(self.x,self.y_o)
 
-        anim = animation.FuncAnimation(fig,self.frame, fargs= (ax,), frames=int(self.n_steps), interval = 0.001)
-        plt.show()
-
+        anim = animation.FuncAnimation(fig,self.frame, fargs= (ax,), frames=int(self.n_steps), interval = 0.0000000001)
         if save_animation == True:
-            anim.save('sin_wave_animation.mp4', fps=30)
+            anim.save('sin5pi_if_wave_animation.mp4', fps=30)
             plt.close()
         
 
     
 
     def frame(self, iteration, ax):
-        self.step()
         ax.clear()
         ax.set_ylim(-1.5,1.5)
-        ax.set_title(f'Time: {np.round(iteration*self.tao,6)}')
-        ax.plot(self.x,self.y)
+        ax.set_title(f'Time = {np.round(iteration*self.tao,6)}')
+        ax.plot(self.x,self.data[iteration])
 
 
 
 if __name__ == "__main__":
-    string = Vibrating_string(2,100,100)
-    a = string.animation()
+    string = Vibrating_string(3,100,1)
+    string.animation(save_animation = True)
+    
 
 
