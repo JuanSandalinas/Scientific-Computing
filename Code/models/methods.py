@@ -37,10 +37,10 @@ def jacobi(C,object_, stop,store_step = 1):
         C[non_cte[0],non_cte[1]] = (1/4 *(c1+c2))[non_cte[0],non_cte[1]]
 
         if np.allclose(C, C_b, atol=stop):
-            yield C
+            yield (C,n_count)
             break
         if n_count%store_step == 0:
-            yield C
+            yield (C,n_count)
     
 
 
@@ -61,7 +61,6 @@ def gauss_seidel(C, object_,stop,store_step = 1):
         n_count += 1 
         C_b = np.copy(C)
         for i in np.unique(non_cte[0]):
-            
             for j in non_cte[1][non_cte[0] == i]:
                 if j == 0:
                     C[i,0] = w*(C[i+1,0] + C[i-1,0] + C[i,1] + C[i,-2])
@@ -70,20 +69,18 @@ def gauss_seidel(C, object_,stop,store_step = 1):
                 else:
                     C[i,j] = w*(C[i+1,j] + C[i-1,j] + C[i,j+1] + C[i,j-1])
             
-            
-
         if np.allclose(C, C_b, atol=stop):
-            yield C
+            yield (C,n_count)
             break
         if n_count%store_step == 0:
-            yield C
+            yield (C,n_count)
 
 
 def sor(C,object_,w,stop,store_step = 1):
     """
     Performs Successive over relaxation.
     Inputs:
-        - A: Matrix A with all values
+        - C: Matrix A with all values
         - w: weight
         - stop: simulation stopper
     """
@@ -104,10 +101,27 @@ def sor(C,object_,w,stop,store_step = 1):
             
 
         if np.allclose(C, C_b, atol=stop):
-            yield C
+            yield (C,n_count)
             break
         if n_count%store_step == 0:
-            yield C
+            yield (C,n_count)
+
+    
+    def random_walk(C, object_,n_walkers,store_step=1):
+        """
+        Given an DLA, creates a random walk on it
+        Inputs:
+            - C: Matrix with all concentrations
+            - object_: Matrix with positions to not update
+            - n_walkers: Number of walkers to deploy. One per iterations
+        """
+        mu = 0
+        sigma = 1
+        move = np.random.normal(mu, sigma, num_steps)
+
+
+
+    
     
 
 
