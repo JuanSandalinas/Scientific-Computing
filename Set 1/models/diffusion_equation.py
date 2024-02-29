@@ -48,9 +48,9 @@ class SimulationGrid:
 
 
 
+
     def initialize(self):
         """
-
         Initializes matrix with all all 0 concentrations except 1 on first row
         object_ matrix specifies which points need to be updated
         """
@@ -66,7 +66,7 @@ class SimulationGrid:
 
         object_[-1,:] = 1
 
-        self.object_ = object_ 
+        self.object_ = object_
     
 
     def square(self, size, position):
@@ -87,21 +87,6 @@ class SimulationGrid:
 
         self.object_[position[0]:position[0]+size,position[1]:position[1]+size]  = np.ones((size, size))
     
-    def dla(self,position):
-        """
-
-        Creates a sink point for DLA. Updates object_ matrix
-
-        Inputs:
-
-            - position: Tuple of two points
-        """
-
-        if (position[0]) >= (self.N-1) or (position[1]) >= (self.N-1) :
-
-            raise Exception ("Outside bounds")
-
-        self.object_[position[0], position[1]] = 1
         
 
 
