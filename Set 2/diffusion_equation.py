@@ -44,7 +44,9 @@ class SimulationGrid:
 
         self.data = [self.A] #For simulations
 
-        self.data_especial = [] #To store the time at 0.1,0.001,....´
+        self.data_especial = [] #To store the time at 0.1,0.001,....
+
+        self.particles = np.zeros((self.N+1,self.N+1))
 
 
 
@@ -122,6 +124,7 @@ class SimulationGrid:
         Does one iteration of a random walk.
         Updates, object and concentration in that point
         """
+        
         moves = np.array([[-1,0],[1,0],[0,1],[0,-1]])
         particles_position = np.column_stack(np.where(self.object_ == 2))
         
@@ -129,7 +132,8 @@ class SimulationGrid:
         
         move = np.random.choice(moves, size = particles_position.shape[0])
         particles_position += move
-        self.object_[particles_position] = 1
+        
+        self.object_[particles_position] = 2
 
         
                 
