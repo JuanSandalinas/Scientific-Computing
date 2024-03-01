@@ -365,53 +365,74 @@ class SimulationGrid:
                 rand = [random(), random(), random(), random()]
 
                 if a == 0 and b == 0:
-                    l = 0
                     u = 0
-                elif a == self.N - 1 and b == 0:
+                    d = self.data[a - 1, b] ** eta
                     l = 0
+                    r = self.data[a, b + 1] ** eta
+                elif a == self.N - 1 and b == 0:
+                    u = self.data[a + 1, b] ** eta
                     d = 0
+                    l = 0
+                    r = self.data[a, b + 1] ** eta
                 elif a == 0 and b == self.N - 1:
                     u = 0
+                    d = self.data[a - 1, b] ** eta
+                    l = self.data[a, b - 1] ** eta
                     r = 0
                 elif a == self.N - 1 and b == self.N - 1:
-                    r = 0
+                    u = self.data[a + 1, b] ** eta
                     d = 0
+                    l = self.data[a, b - 1] ** eta
+                    r = 0
                 else:
                     if a == 0:
                         u = 0
+                        d = self.data[a - 1, b] ** eta
+                        l = self.data[a, b - 1] ** eta
+                        r = self.data[a, b + 1] ** eta
                     elif a == self.N - 1:
+                        u = self.data[a + 1, b] ** eta
                         d = 0
+                        l = self.data[a, b - 1] ** eta
+                        r = self.data[a, b + 1] ** eta
                     elif b == 0:
+                        u = self.data[a + 1, b] ** eta
+                        d = self.data[a - 1, b] ** eta
                         l = 0
+                        r = self.data[a, b + 1] ** eta
                     elif b == self.N - 1:
+                        u = self.data[a + 1, b] ** eta
+                        d = self.data[a - 1, b] ** eta
+                        l = self.data[a, b - 1] ** eta
                         r = 0
                     else:
                         u = self.data[a + 1, b] ** eta
                         d = self.data[a - 1, b] ** eta
-                        r = self.data[a, b + 1] ** eta
                         l = self.data[a, b - 1] ** eta
+                        r = self.data[a, b + 1] ** eta
 
-                        if cluster[a - 1, b] == 1:
-                            u = 0
-                        if cluster[a + 1, b] == 1:
-                            d = 0
-                        if cluster[a, b - 1] == 1:
-                            l = 0
-                        if cluster[a, b + 1] == 1:
-                            r = 0
 
-                if (d + u + l + r) == 0:
-                    pass
-                else:
-                    count = 0
-                    for j in range(1, self.N - 1):
-                        for k in range(1, self.N - 1):
-                            p[j, k] = self.data[j, k] / (d + u + l + r)
+            if cluster[a - 1, b] == 1:
+                u = 0
+            if cluster[a + 1, b] == 1:
+                d = 0
+            if cluster[a, b - 1] == 1:
+                l = 0
+            if cluster[a, b + 1] == 1:
+                r = 0
 
-                            if p[j, k] > rand[count]:
-                                self.data[j, k] = 0
-                                cluster[j, k] = 1
-                                court = + 1
+            if (d + u + l + r) == 0:
+                pass
+            else:
+                count = 0
+                for j in range(1, self.N - 1):
+                    for k in range(1, self.N - 1):
+                        p[j, k] = self.data[j, k] / (d + u + l + r)
+
+                        if p[j, k] > rand[count]:
+                            self.data[j, k] = 0
+                            cluster[j, k] = 1
+                            count =+ 1
 
             if np.allclose(self.data, C_b, atol=stop):
                 yield (self.data, n_count)
