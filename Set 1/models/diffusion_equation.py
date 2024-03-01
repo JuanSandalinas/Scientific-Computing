@@ -7,6 +7,8 @@ import numpy as np
 
 import math
 
+import random
+
 import matplotlib.pyplot as plt
 
 import matplotlib.animation as animation
@@ -339,7 +341,7 @@ class SimulationGrid:
         cluster = np.zeros([self.N, self.N])
 
         n_count = 0
-        non_cte = np.where(object_ == 0)
+        non_cte = np.where(self.object_ == 0)
 
         while True:
 
@@ -362,35 +364,35 @@ class SimulationGrid:
                 a = sink[0][k]
                 b = sink[1][k]
 
-                if a == 0
+                if a == 0:
                     u = 0
-                if a == self.N - 1
+                if a == self.N - 1:
                     d = 0
-                if b == 0
+                if b == 0:
                     l = 0
-                if b == self.N - 1
+                if b == self.N - 1:
                     r = 0
 
-                if a != 0
+                if a != 0:
                     if cluster[a - 1, b] == 1:
                         u = 0
-                if a != self.N - 1
+                if a != self.N - 1:
                     if cluster[a + 1, b] == 1:
                         d = 0
-                if b != 0
+                if b != 0:
                     if cluster[a, b - 1] == 1:
                         l = 0
-                if b != self.N - 1
+                if b != self.N - 1:
                     if cluster[a, b + 1] == 1:
                         r = 0
 
-                if u != 0
+                if u != 0:
                     u = self.data[a - 1, b] ** eta
-                if d != 0
+                if d != 0:
                     d = self.data[a + 1, b] ** eta
-                if l != 0
+                if l != 0:
                     l = self.data[a, b - 1] ** eta
-                if r !=
+                if r != 0:
                     r = self.data[a, b + 1] ** eta
 
                 if (d + u + l + r) != 0:
