@@ -410,25 +410,26 @@ class SimulationGrid:
                         l = self.data[a, b - 1] ** eta
                         r = self.data[a, b + 1] ** eta
 
+            if a != 0
+                if cluster[a - 1, b] == 1:
+                    u = 0
+            if a != self.N - 1
+                if cluster[a + 1, b] == 1:
+                    d = 0
+            if b != 0
+                if cluster[a, b - 1] == 1:
+                    l = 0
+            if b != self.N - 1
+                if cluster[a, b + 1] == 1:
+                    r = 0
 
-            if cluster[a - 1, b] == 1:
-                u = 0
-            if cluster[a + 1, b] == 1:
-                d = 0
-            if cluster[a, b - 1] == 1:
-                l = 0
-            if cluster[a, b + 1] == 1:
-                r = 0
-
-            if (d + u + l + r) == 0:
-                pass
-            else:
+            if (d + u + l + r) != 0:
                 for j in range(1, self.N - 1):
                     for k in range(1, self.N - 1):
                         p[j, k] = self.data[j, k] / (d + u + l + r)
 
                         if p[j, k] > random():
-                            self.data[j, k] = 0
+                            self.data[j, k] = 1
                             cluster[j, k] = 1
 
             if np.allclose(self.data, C_b, atol=stop):
