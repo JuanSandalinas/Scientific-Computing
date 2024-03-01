@@ -15,9 +15,6 @@ from scipy.sparse import diags
 
 from scipy.sparse import csr_matrix
 
-import random
-
-
 
 class SimulationGrid:
 
@@ -342,7 +339,7 @@ s
         ax.imshow(C, cmap='hot', interpolation='nearest', extent=[0, 1, 0, 1])
 
 
-def dla(self, position, w, eta, stop, store_step=1):
+def growth_model(self, position, w, eta, stop, store_step=1):
     if (position[0]) >= (self.N - 1) or (position[1]) >= (self.N - 1):
         raise Exception("Outside bounds")
 
