@@ -362,7 +362,6 @@ class SimulationGrid:
                 p = np.zeros([self.N, self.N])
                 a = sink[0][i]
                 b = sink[1][i]
-                rand = [random(), random(), random(), random()]
 
                 if a == 0 and b == 0:
                     u = 0
@@ -424,15 +423,13 @@ class SimulationGrid:
             if (d + u + l + r) == 0:
                 pass
             else:
-                count = 0
                 for j in range(1, self.N - 1):
                     for k in range(1, self.N - 1):
                         p[j, k] = self.data[j, k] / (d + u + l + r)
 
-                        if p[j, k] > rand[count]:
+                        if p[j, k] > random():
                             self.data[j, k] = 0
                             cluster[j, k] = 1
-                            count =+ 1
 
             if np.allclose(self.data, C_b, atol=stop):
                 yield (self.data, n_count)
