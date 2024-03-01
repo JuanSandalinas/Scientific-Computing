@@ -358,79 +358,47 @@ class SimulationGrid:
 
             sink = np.where(cluster == 1)
 
-            for i in range(len(sink[0])):
-                p = np.zeros([self.N, self.N])
-                a = sink[0][i]
-                b = sink[1][i]
+            for k in range(len(sink[0])):
+                a = sink[0][k]
+                b = sink[1][k]
 
-                if a == 0 and b == 0:
+                if a == 0
                     u = 0
-                    d = self.data[a + 1, b] ** eta
-                    l = 0
-                    r = self.data[a, b + 1] ** eta
-                elif a == self.N - 1 and b == 0:
-                    u = self.data[a - 1, b] ** eta
+                if a == self.N - 1
                     d = 0
+                if b == 0
                     l = 0
-                    r = self.data[a, b + 1] ** eta
-                elif a == 0 and b == self.N - 1:
-                    u = 0
-                    d = self.data[a + 1, b] ** eta
-                    l = self.data[a, b - 1] ** eta
+                if b == self.N - 1
                     r = 0
-                elif a == self.N - 1 and b == self.N - 1:
-                    u = self.data[a - 1, b] ** eta
-                    d = 0
-                    l = self.data[a, b - 1] ** eta
-                    r = 0
-                else:
-                    if a == 0:
+
+                if a != 0
+                    if cluster[a - 1, b] == 1:
                         u = 0
-                        d = self.data[a + 1, b] ** eta
-                        l = self.data[a, b - 1] ** eta
-                        r = self.data[a, b + 1] ** eta
-                    elif a == self.N - 1:
-                        u = self.data[a - 1, b] ** eta
+                if a != self.N - 1
+                    if cluster[a + 1, b] == 1:
                         d = 0
-                        l = self.data[a, b - 1] ** eta
-                        r = self.data[a, b + 1] ** eta
-                    elif b == 0:
-                        u = self.data[a - 1, b] ** eta
-                        d = self.data[a + 1, b] ** eta
+                if b != 0
+                    if cluster[a, b - 1] == 1:
                         l = 0
-                        r = self.data[a, b + 1] ** eta
-                    elif b == self.N - 1:
-                        u = self.data[a - 1, b] ** eta
-                        d = self.data[a + 1, b] ** eta
-                        l = self.data[a,b - 1] ** eta
+                if b != self.N - 1
+                    if cluster[a, b + 1] == 1:
                         r = 0
-                    else:
-                        u = self.data[a - 1, b] ** eta
-                        d = self.data[a + 1, b] ** eta
-                        l = self.data[a, b - 1] ** eta
-                        r = self.data[a, b + 1] ** eta
 
-            if a != 0
-                if cluster[a - 1, b] == 1:
-                    u = 0
-            if a != self.N - 1
-                if cluster[a + 1, b] == 1:
-                    d = 0
-            if b != 0
-                if cluster[a, b - 1] == 1:
-                    l = 0
-            if b != self.N - 1
-                if cluster[a, b + 1] == 1:
-                    r = 0
+                if u != 0
+                    u = self.data[a - 1, b] ** eta
+                if d != 0
+                    d = self.data[a + 1, b] ** eta
+                if l != 0
+                    l = self.data[a, b - 1] ** eta
+                if r !=
+                    r = self.data[a, b + 1] ** eta
 
-            if (d + u + l + r) != 0:
-                for j in range(1, self.N - 1):
-                    for k in range(1, self.N - 1):
-                        p[j, k] = self.data[j, k] / (d + u + l + r)
-
-                        if p[j, k] > random():
-                            self.data[j, k] = 1
-                            cluster[j, k] = 1
+                if (d + u + l + r) != 0:
+                    for i in [a-1, a+1]:
+                        for j in [b-1, b+1]:
+                            if self.data[i, j] / (d + u + l + r) > random():
+                                self.data[i, j] = 1
+                                cluster[i, j] = 1
 
             if np.allclose(self.data, C_b, atol=stop):
                 yield (self.data, n_count)
