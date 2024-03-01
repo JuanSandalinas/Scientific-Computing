@@ -15,6 +15,8 @@ from scipy.sparse import diags
 
 from scipy.sparse import csr_matrix
 
+import random
+
 
 
 class SimulationGrid:
@@ -340,7 +342,91 @@ s
         ax.imshow(C, cmap='hot', interpolation='nearest', extent=[0, 1, 0, 1])
 
 
- 
+def dla(self, position, w, eta, stop, store_step=1):
+    if (position[0]) >= (self.N - 1) or (position[1]) >= (self.N - 1):
+        raise Exception("Outside bounds")
+
+    self.data = [self.A]
+
+    self.object_[position[0], position[1]] = 1
+
+    cluster = np.zeros([self.N, self.N])
+
+    n_count = 0
+    non_cte = np.where(self.object_ == 0)
+
+    while True:
+
+        n_count += 1
+        C_b = np.copy(self.data)
+        for i in np.unique(non_cte[0]):
+
+            for j in non_cte[1][non_cte[0] == i]:
+                if j == 0:
+                    self.data[i, 0] = (w / 4) * (
+                                self.data[i + 1, 0] + self.data[i - 1, 0] + self.data[i, 1] + self.data[i, -2]) + (
+                                                  1 - w) * self.data[i, 0]
+                elif j == (self.N - 1):
+                    self.data[i, -1] = (w / 4) * (
+                                self.data[i + 1, -1] + self.data[i - 1, -1] + self.data[i, 1] + self.data[i, -2]) + (
+                                                   1 - w) * self.data[i, -1]
+                else:
+                    self.data[i, j] = (w / 4) * (
+                                self.data[i + 1, j] + self.data[i - 1, j] + self.data[i, j + 1] + self.data[
+                            i, j - 1]) + (1 - w) * self.data[i, j]
+
+        sink = np.where(cluster == 1)
+
+        for k in range(len(sink[0])):
+            a = sink[0][k]
+            b = sink[1][k]
+
+            if a == 0:
+                u = 0
+            if a == self.N - 1:
+                d = 0
+            if b == 0:
+                l = 0
+            if b == self.N - 1:
+                r = 0
+
+            if a != 0:
+                if cluster[a - 1, b] == 1:
+                    u = 0
+            if a != self.N - 1:
+                if cluster[a + 1, b] == 1:
+                    d = 0
+            if b != 0:
+                if cluster[a, b - 1] == 1:
+                    l = 0
+            if b != self.N - 1:
+                if cluster[a, b + 1] == 1:
+                    r = 0
+
+            if u != 0:
+                u = self.data[a - 1, b] ** eta
+            if d != 0:
+                d = self.data[a + 1, b] ** eta
+            if l != 0:
+                l = self.data[a, b - 1] ** eta
+            if r != 0:
+                r = self.data[a, b + 1] ** eta
+
+            if (d + u + l + r) != 0:
+                for i in [a - 1, a + 1]:
+                    for j in [b - 1, b + 1]:
+                        if self.data[i, j] / (d + u + l + r) > random():
+                            self.data[i, j] = 1
+                            cluster[i, j] = 1
+
+        if np.allclose(self.data, C_b, atol=stop):
+            yield (self.data, n_count)
+            break
+        if n_count % store_step == 0:
+            yield (self.data, n_count)
+
+    return self.data
+
 
 if __name__ == "__main__": 
 
