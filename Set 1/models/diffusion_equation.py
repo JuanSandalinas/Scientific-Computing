@@ -365,48 +365,48 @@ class SimulationGrid:
 
                 if a == 0 and b == 0:
                     u = 0
-                    d = self.data[a - 1, b] ** eta
+                    d = self.data[a + 1, b] ** eta
                     l = 0
                     r = self.data[a, b + 1] ** eta
                 elif a == self.N - 1 and b == 0:
-                    u = self.data[a + 1, b] ** eta
+                    u = self.data[a - 1, b] ** eta
                     d = 0
                     l = 0
                     r = self.data[a, b + 1] ** eta
                 elif a == 0 and b == self.N - 1:
                     u = 0
-                    d = self.data[a - 1, b] ** eta
+                    d = self.data[a + 1, b] ** eta
                     l = self.data[a, b - 1] ** eta
                     r = 0
                 elif a == self.N - 1 and b == self.N - 1:
-                    u = self.data[a + 1, b] ** eta
+                    u = self.data[a - 1, b] ** eta
                     d = 0
                     l = self.data[a, b - 1] ** eta
                     r = 0
                 else:
                     if a == 0:
                         u = 0
-                        d = self.data[a - 1, b] ** eta
+                        d = self.data[a + 1, b] ** eta
                         l = self.data[a, b - 1] ** eta
                         r = self.data[a, b + 1] ** eta
                     elif a == self.N - 1:
-                        u = self.data[a + 1, b] ** eta
+                        u = self.data[a - 1, b] ** eta
                         d = 0
                         l = self.data[a, b - 1] ** eta
                         r = self.data[a, b + 1] ** eta
                     elif b == 0:
-                        u = self.data[a + 1, b] ** eta
-                        d = self.data[a - 1, b] ** eta
+                        u = self.data[a - 1, b] ** eta
+                        d = self.data[a + 1, b] ** eta
                         l = 0
                         r = self.data[a, b + 1] ** eta
                     elif b == self.N - 1:
-                        u = self.data[a + 1, b] ** eta
-                        d = self.data[a - 1, b] ** eta
-                        l = self.data[a, b - 1] ** eta
+                        u = self.data[a - 1, b] ** eta
+                        d = self.data[a + 1, b] ** eta
+                        l = self.data[a,b - 1] ** eta
                         r = 0
                     else:
-                        u = self.data[a + 1, b] ** eta
-                        d = self.data[a - 1, b] ** eta
+                        u = self.data[a - 1, b] ** eta
+                        d = self.data[a + 1, b] ** eta
                         l = self.data[a, b - 1] ** eta
                         r = self.data[a, b + 1] ** eta
 
