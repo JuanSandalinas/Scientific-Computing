@@ -31,7 +31,7 @@ class SimulationGrid:
 
             - D: Parameter , default set to 1
 
-            - object_: Objects positions if there are any, default set to none
+            - object_: Matrix that specifies sink points. 0 means the state changes, 1 means it does not and it is fixde
         """
 
         self.D = 1
@@ -106,37 +106,6 @@ class SimulationGrid:
             raise Exception ("Outside bounds")
 
         self.object_[position[0], position[1]] = 1
-    
-
-    def particle_creation(self):
-
-        """
-        Creates a particle for the DL. and put is in particles
-        Particles are noted as a 2
-        """
-
-        position = np.random.randint(0,self.N)
-        self.object_[0,position] = 2
-    
-
-    def random_walk(self):
-        """
-        Does one iteration of a random walk.
-        Updates, object and concentration in that point
-        """
-        
-        moves = np.array([[-1,0],[1,0],[0,1],[0,-1]])
-        particles_position = np.column_stack(np.where(self.object_ == 2))
-        
-        self.object_[particles_position] = 0
-        
-        move = np.random.choice(moves, size = particles_position.shape[0])
-        particles_position += move
-        
-        self.object_[particles_position] = 2
-
-        
-                
 
 
 
@@ -312,7 +281,7 @@ class SimulationGrid:
         Animates the stepping scheme:
 
         Inputs:
-
+s
             -   method: If using time_dependent or time_independent
 
             -   method_fun: If time_independent, which method to use
