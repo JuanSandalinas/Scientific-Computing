@@ -5,8 +5,6 @@ def growth_model(N, position, w, eta, stop):
     # N is the grid size
     # position is the initial place with a sink
 
-    if (position[0]) >= (N - 1) or (position[1]) >= (N - 1):
-        raise Exception("Outside bounds")
 
     # C is the 3-dimensional matrix for iteration
     C = np.zeros((N + 1, N + 1, N + 1))
@@ -19,7 +17,8 @@ def growth_model(N, position, w, eta, stop):
     cluster = np.zeros((N + 1, N + 1, N + 1))
 
     # initial condition for the sink
-    cluster[0][position[0]][position[1]] = 1
+    for i in range(len(position[0])):
+        cluster[0][position[0][i]][position[1][i]] = 1
 
     n_count = 0
     measure = 1
