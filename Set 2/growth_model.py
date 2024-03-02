@@ -1,5 +1,5 @@
 import numpy as np
-import random
+from random import random
 
 def growth_model(N, position, w, eta, stop):
     # N is the grid size
@@ -12,9 +12,8 @@ def growth_model(N, position, w, eta, stop):
     C = np.zeros((N + 1, N + 1, N + 1))
 
     # Initial condition
-    C[0][0][:] = 1
-
-    n_count = 0
+    for i in range(N + 1):
+        C[i][0][:] = 1
 
     # cluster is the 3-dimensional matrix for updating the sinks
     cluster = np.zeros((N + 1, N + 1, N + 1))
@@ -22,6 +21,7 @@ def growth_model(N, position, w, eta, stop):
     # initial condition for the sink
     cluster[0][position[0]][position[1]] = 1
 
+    n_count = 0
     measure = 1
 
     # SOR
@@ -31,20 +31,30 @@ def growth_model(N, position, w, eta, stop):
         cluster[n_count] = cluster[n_count - 1]
         non_cte = np.where(cluster[n_count] == 0)
 
-        for i in range(len(non_cte)):
+        for i in range(len(non_cte[0])):
 
             if non_cte[0][i] == 0 or non_cte[0][i] == N:
-                pass
                 measure_n = measure
-            elif non_cte[1][i] == 0:
-                C[n_count][non_cte[0][i]][non_cte[1][i]] = w * 0.25 * (C[n_count][non_cte[0][i] - 1][0] + C[n_count - 1][non_cte[0][i] + 1][0] + C[n_count - 1][non_cte[0][i]][2] + C[n_count][non_cte[0][i]][non_cte[1][-1]]) + (1 - w) * C[n_count - 1][non_cte[0][i]][0]
-                measure_n = C[n_count][non_cte[0][i]][0] - C[n_count - 1][non_cte[0][i]][non_cte[1][i]]
-            elif non_cte[1][i] == N:
-                C[n_count][non_cte[0][i]][N] = w * 0.25 * (C[n_count][non_cte[0][i] - 1][N] + C[n_count - 1][non_cte[0][i] + 1][N] + C[n_count][non_cte[0][i]][N + 1] + C[n_count - 1][non_cte[0][i]][N - 1]) + (1 - w) * C[n_count - 1][non_cte[0][i]][N]
-                measure_n = C[n_count][non_cte[0][i]][N] - C[n_count - 1][non_cte[0][i]][N]
             else:
-                C[n_count][non_cte[0][i]][non_cte[1][i]] = w * 0.25 * (C[n_count][non_cte[0][i] - 1][non_cte[1][i]] + C[n_count - 1][non_cte[0][i] + 1][non_cte[1][i]] + C[n_count - 1][non_cte[0][i]][non_cte[1][i] + 1] + C[n_count][non_cte[0][i]][non_cte[1][i] - 1]) + (1 - w) * C[n_count - 1][non_cte[0][i]][non_cte[1][i]]
-                measure_n = C[n_count][non_cte[0][i]][non_cte[1][i]] - C[n_count - 1][non_cte[0][i]][non_cte[1][i]]
+                if non_cte[1][i] == 0:
+                    C[n_count][non_cte[0][i]][0] = w * 0.25 * (
+                                C[n_count][non_cte[0][i] - 1][0] + C[n_count - 1][non_cte[0][i] + 1][0] +
+                                C[n_count - 1][non_cte[0][i]][1] + C[n_count][non_cte[0][i]][-1]) + (1 - w) * \
+                                                   C[n_count - 1][non_cte[0][i]][0]
+                    measure_n = C[n_count][non_cte[0][i]][0] - C[n_count - 1][non_cte[0][i]][0]
+                elif non_cte[1][i] == N:
+                    C[n_count][non_cte[0][i]][N] = w * 0.25 * (
+                                C[n_count][non_cte[0][i] - 1][N] + C[n_count - 1][non_cte[0][i] + 1][N] +
+                                C[n_count - 1][non_cte[0][i]][1] + C[n_count][non_cte[0][i]][N - 1]) + (1 - w) * \
+                                                   C[n_count - 1][non_cte[0][i]][N]
+                    measure_n = C[n_count][non_cte[0][i]][N] - C[n_count - 1][non_cte[0][i]][N]
+                else:
+                    C[n_count][non_cte[0][i]][non_cte[1][i]] = w * 0.25 * (
+                                C[n_count][non_cte[0][i] - 1][non_cte[1][i]] + C[n_count - 1][non_cte[0][i] + 1][
+                            non_cte[1][i]] + C[n_count - 1][non_cte[0][i]][non_cte[1][i] + 1] +
+                                C[n_count][non_cte[0][i]][non_cte[1][i] - 1]) + (1 - w) * C[n_count - 1][non_cte[0][i]][
+                                                                   non_cte[1][i]]
+                    measure_n = C[n_count][non_cte[0][i]][non_cte[1][i]] - C[n_count - 1][non_cte[0][i]][non_cte[1][i]]
 
             if measure_n > measure:
                 measure = measure_n
@@ -116,4 +126,4 @@ def growth_model(N, position, w, eta, stop):
                             C[n_count][i][j] = 0
                             cluster[n_count][i][j] = 1
 
-        return C
+        return [C, cluster, n_count]
