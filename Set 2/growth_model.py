@@ -62,7 +62,7 @@ def growth_model(N, position, w, eta, stop):
         for i in range(N):
             for j in range(N):
                 if cluster[n_count][i][j] == 1:
-                    C[n_count][i][j] = 1
+                    C[n_count][i][j] = 0
 
         sink = np.where(cluster[n_count] == 1)
 
@@ -119,10 +119,15 @@ def growth_model(N, position, w, eta, stop):
 
             # calculating the probability of becoming a sink for candidates
             if (d + u + l + r) != 0:
+
                 for i in [a - 1, a + 1]:
-                    for j in [b - 1, b + 1]:
-                        if C[n_count][i][j] / (d + u + l + r) > random():
-                            C[n_count][i][j] = 1
-                            cluster[n_count][i][j] = 1
+                    if (C[n_count][i][b] ** eta)/ (d + u + l + r) > random():
+                        C[n_count][i][b] = 0
+                        cluster[n_count][i][b] = 1
+
+                for j in [b - 1, b + 1]:
+                    if (C[n_count][a][j] ** eta) / (d + u + l + r) > random():
+                        C[n_count][a][j] = 0
+                        cluster[n_count][a][j] = 1
 
         return [C, cluster, n_count]
