@@ -308,7 +308,7 @@ s
         C = np.copy(self.A)
         
 
-        ax.imshow(C, cmap='hot', interpolation='nearest', extent=[0, 1, 0, 1])
+        ax.imshow(C, cmap='plasma', interpolation='nearest', extent=[0, 1, 0, 1])
 
         ax.set_xlabel('X')  
 
