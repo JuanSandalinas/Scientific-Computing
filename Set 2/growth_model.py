@@ -62,7 +62,7 @@ def growth_model(N, position, w, eta, stop):
         for i in range(N):
             for j in range(N):
                 if cluster[n_count][i][j] == 1:
-                    C[n_count][i][j] = 0
+                    C[n_count][i][j] = 1
 
         sink = np.where(cluster[n_count] == 1)
 
@@ -122,7 +122,7 @@ def growth_model(N, position, w, eta, stop):
                 for i in [a - 1, a + 1]:
                     for j in [b - 1, b + 1]:
                         if C[n_count][i][j] / (d + u + l + r) > random():
-                            C[n_count][i][j] = 0
+                            C[n_count][i][j] = 1
                             cluster[n_count][i][j] = 1
 
         return [C, cluster, n_count]
