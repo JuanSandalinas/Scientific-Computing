@@ -16,7 +16,6 @@ from scipy.sparse import diags
 from scipy.sparse import csr_matrix
 
 
-
 class SimulationGrid:
 
 
@@ -339,101 +338,6 @@ s
 
         ax.imshow(C, cmap='hot', interpolation='nearest', extent=[0, 1, 0, 1])
 
-
-    def dla(self, position, w, eta, stop, store_step = 1):
-
-        if (position[0]) >= (self.N - 1) or (position[1]) >= (self.N - 1):
-
-            raise Exception("Outside bounds")
-
-        self.data = [self.A]
-
-        self.object_[position[0], position[1]] = 1
-
-        cluster = np.zeros([self.N, self.N])
-
-        n_count = 0
-        non_cte = np.where(object_ == 0)
-
-        while True:
-
-            n_count += 1
-            C_b = np.copy(self.data)
-            for i in np.unique(non_cte[0]):
-
-                for j in non_cte[1][non_cte[0] == i]:
-                    if j == 0:
-                        self.data[i, 0] = (w / 4) * (self.data[i + 1, 0] + self.data[i - 1, 0] + self.data[i, 1] + self.data[i, -2]) + (1 - w) * self.data[i, 0]
-                    elif j == (self.N - 1):
-                        self.data[i, -1] = (w / 4) * (self.data[i + 1, -1] + self.data[i - 1, -1] + self.data[i, 1] + self.data[i, -2]) + (1 - w) * self.data[i, -1]
-                    else:
-                        self.data[i, j] = (w / 4) * (self.data[i + 1, j] + self.data[i - 1, j] + self.data[i, j + 1] + self.data[i, j - 1]) + (1 - w) * self.data[i, j]
-
-
-            sink = np.where(cluster == 1)
-
-            for i in range(len(sink[0])):
-                p = np.zeros([self.N, self.N])
-                a = sink[0][i]
-                b = sink[1][i]
-                rand = [random(), random(), random(), random()]
-
-                if a == 0 and b == 0:
-                    l = 0
-                    u = 0
-                elif a == self.N - 1 and b == 0:
-                    l = 0
-                    d = 0
-                elif a == 0 and b == self.N - 1:
-                    u = 0
-                    r = 0
-                elif a == self.N - 1 and b == self.N - 1:
-                    r = 0
-                    d = 0
-                else:
-                    if a == 0:
-                        u = 0
-                    elif a == self.N - 1:
-                        d = 0
-                    elif b == 0:
-                        l = 0
-                    elif b == self.N - 1:
-                        r = 0
-                    else:
-                        u = self.data[a + 1, b] ** eta
-                        d = self.data[a - 1, b] ** eta
-                        r = self.data[a, b + 1] ** eta
-                        l = self.data[a, b - 1] ** eta
-
-                        if cluster[a - 1, b] == 1:
-                            u = 0
-                        if cluster[a + 1, b] == 1:
-                            d = 0
-                        if cluster[a, b - 1] == 1:
-                            l = 0
-                        if cluster[a, b + 1] == 1:
-                            r = 0
-
-                if (d + u + l + r) == 0:
-                    pass
-                else:
-                    count = 0
-                    for j in range(1, self.N - 1):
-                        for k in range(1, self.N - 1):
-                            p[j, k] = self.data[j, k] / (d + u + l + r)
-
-                            if p[j, k] > rand[count]:
-                                self.data[j, k] = 0
-                                cluster[j, k] = 1
-                                court = + 1
-
-            if np.allclose(self.data, C_b, atol=stop):
-                yield (self.data, n_count)
-                break
-            if n_count % store_step == 0:
-                yield (self.data, n_count)
-
-        return self.data
 
  
 
