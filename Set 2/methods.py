@@ -106,20 +106,6 @@ def sor(C,object_,w,stop,store_step = 1):
         if n_count%store_step == 0:
             yield (C,n_count)
 
-    
-    def random_walk(C, object_,n_walkers,store_step=1):
-        """
-        Given an DLA, creates a random walk on it
-        Inputs:
-            - C: Matrix with all concentrations
-            - object_: Matrix with positions to not update
-            - n_walkers: Number of walkers to deploy. One per iterations
-        """
-        mu = 0
-        sigma = 1
-        move = np.random.normal(mu, sigma, num_steps)
-
-
 
     
     
