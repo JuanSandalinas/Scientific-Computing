@@ -64,70 +64,130 @@ def growth_model(N, position, w, eta, stop):
                 if cluster[n_count][i][j] == 1:
                     C[n_count][i][j] = 0
 
+        # Finding all the candidates
         sink = np.where(cluster[n_count] == 1)
+        candidate = np.zeros((N + 1, N + 1))
+        c_candidate = 0
+        tag = np.zeros((N + 1, N + 1))
 
         for k in range(len(sink[0])):
             a = sink[0][k]
             b = sink[1][k]
 
-            # recording the concentration of four candidates
             if a == 0 and b == 0:
-                u = 0
-                d = C[n_count][a + 1][b] ** eta
-                l = 0
-                r = C[n_count][a][b + 1] ** eta
+                if sink[0][1] != 1 and tag[0][1] == 0:
+                    candidate[0].append(0)
+                    candidate[1].append(b+1)
+                    tag[0][1] = 1
+                if sink[1][0] != 1 and tag[1][0] == 0:
+                    candidate[0].append(a+1)
+                    candidate[1].append(b)
+                    tag[1][0] = 1
             elif a == N and b == 0:
-                u = C[n_count][a - 1][b] ** eta
-                d = 0
-                l = 0
-                r = C[n_count][a][b + 1] ** eta
+                if sink[N-1][0] != 1 and tag[N-1][0] == 0:
+                    candidate[0].append(N-1)
+                    candidate[1].append(0)
+                    tag[N-1][0] = 1
+                if sink[N][1] != 1 and tag[N][1] == 0:
+                    candidate[0].append(N)
+                    candidate[1].append(1)
+                    tag[N][1] = 1
             elif a == 0 and b == N:
-                u = 0
-                d = C[n_count][a + 1][b] ** eta
-                l = C[n_count][a][b - 1] ** eta
-                r = 0
+                if sink[0][N-1] != 1 and tag[0][N-1] == 0:
+                    candidate[0].append(0)
+                    candidate[1].append(N-1)
+                    tag[0][N-1] = 1
+                if sink[1][N] != 1 and tag[1][N] == 0:
+                    candidate[0].append(1)
+                    candidate[1].append(N)
+                    tag[1][N] = 1
             elif a == N and b == N:
-                u = C[n_count][a - 1][b] ** eta
-                d = 0
-                l = C[n_count][a][b - 1] ** eta
-                r = 0
+                if sink[N][N-1] != 1 and tag[N][N-1] == 0:
+                    candidate[0].append(N)
+                    candidate[1].append(N-1)
+                    tag[N][N-1] = 1
+                if sink[N-1][N] != 1 and tag[N-1][N] == 0:
+                    candidate[0].append(N-1)
+                    candidate[1].append(N)
+                    tag[N-1][N] = 1
             elif a == 0:
-                u = 0
-                d = C[n_count][a + 1][b] ** eta
-                l = C[n_count][a][b - 1] ** eta
-                r = C[n_count][a][b + 1] ** eta
+                if sink[0][b-1] != 1 and tag[0][b-1] == 0:
+                    candidate[0].append(0)
+                    candidate[1].append(b-1)
+                    tag[1][b-1] = 1
+                if sink[0][b+1] != 1 and tag[0][b+1] == 0:
+                    candidate[0].append(0)
+                    candidate[1].append(b+1)
+                    tag[0][b+1] = 1
+                if sink[1][b] != 1 and tag[1][b] == 0:
+                    candidate[0].append(1)
+                    candidate[1].append(b)
+                    tag[1][b] = 1
             elif a == N:
-                u = C[n_count][a - 1][b] ** eta
-                d = 0
-                l = C[n_count][a][b - 1] ** eta
-                r = C[n_count][a][b + 1] ** eta
+                if sink[N][b-1] != 1 and tag[0][b-1] == 0:
+                    candidate[0].append(0)
+                    candidate[1].append(b-1)
+                    tag[0][b-1] = 1
+                if sink[N][b+1] != 1 and tag[0][b+1] == 0:
+                    candidate[0].append(0)
+                    candidate[1].append(b+1)
+                    tag[0][b+1] = 1
+                if sink[N-1][b] != 1 and tag[N-1][b] == 0:
+                    candidate[0].append(N-1)
+                    candidate[1].append(b)
+                    tag[N-1][b] = 1
             elif b == 0:
-                u = C[n_count][a - 1][b] ** eta
-                d = C[n_count][a + 1][b] ** eta
-                l = 0
-                r = C[n_count][a][b + 1] ** eta
+                if sink[a-1][0] != 1 and tag[a-1][0] == 0:
+                    candidate[0].append(a-1)
+                    candidate[1].append(0)
+                    tag[a-1][0] = 1
+                if sink[a+1][0] != 1 and tag[a+1][0] == 0:
+                    candidate[0].append(a+1)
+                    candidate[1].append(0)
+                    tag[a+1][0] = 1
+                if sink[a][1] != 1 and tag[a][1] == 0:
+                    candidate[0].append(a)
+                    candidate[1].append(1)
+                    tag[a][1] = 1
             elif b == N:
-                u = C[n_count][a - 1][b] ** eta
-                d = C[n_count][a + 1][b] ** eta
-                l = C[n_count][a][b - 1] ** eta
-                r = 0
+                if sink[a][N-1] != 1 and tag[a][N-1] == 0:
+                    candidate[0].append(a)
+                    candidate[1].append(N-1)
+                    tag[a][N-1] = 1
+                if sink[a-1][N] != 1 and tag[a-1][N] == 0:
+                    candidate[0].append(a-1)
+                    candidate[1].append(N)
+                    tag[a-1][b-1] = 1
+                if sink[a+1][N] != 1 and tag[a+1][N] == 0:
+                    candidate[0].append(a+1)
+                    candidate[1].append(N)
+                    tag[a+1][N] = 1
             else:
-                u = C[n_count][a - 1][b] ** eta
-                d = C[n_count][a + 1][b] ** eta
-                l = C[n_count][a][b - 1] ** eta
-                r = C[n_count][a][b + 1] ** eta
+                if sink[a-1][b] != 1 and tag[a-1][b] == 0:
+                    candidate[0].append(a-1)
+                    candidate[1].append(b)
+                    tag[a-1][b] = 1
+                if sink[a+1][b] != 1 and tag[a+1][b] == 0:
+                    candidate[0].append(a+1)
+                    candidate[1].append(b)
+                    tag[a+1][b] = 1
+                if sink[a][b-1] != 1 and tag[a][b-1] == 0:
+                    candidate[0].append(a)
+                    candidate[1].append(b-1)
+                    tag[a][b-1] = 1
+                if sink[a][b+1] != 1 and tag[a][b+1] == 0:
+                    candidate[0].append(a)
+                    candidate[1].append(b+1)
+                    tag[a][b+1] = 1
 
-            # calculating the probability of becoming a sink for candidates
-            if (d + u + l + r) != 0:
 
-                for i in [a - 1, a + 1]:
-                    if (C[n_count][i][b] ** eta)/ (d + u + l + r) > random():
-                        C[n_count][i][b] = 0
-                        cluster[n_count][i][b] = 1
+            c_candidate += C[n_count][candidate[0][-1]][candidate[1][-1]]
 
-                for j in [b - 1, b + 1]:
-                    if (C[n_count][a][j] ** eta) / (d + u + l + r) > random():
-                        C[n_count][a][j] = 0
-                        cluster[n_count][a][j] = 1
+        # calculating the probability of becoming a sink for candidates
+        for k in range(len(candidate[0])):
+
+            if (C[n_count][candidate[0]][candidate[1]] ** eta)/ c_candidate > random():
+                C[n_count][candidate[0]][candidate[1]] = 0
+                cluster[n_count][candidate[0]][candidate[1]] = 1
 
         return [C, cluster, n_count]
