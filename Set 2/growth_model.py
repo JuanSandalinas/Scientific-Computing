@@ -35,7 +35,7 @@ def growth_model(N, position, w, eta, stop):
         for i in range(len(non_cte[0])):
 
             if non_cte[0][i] == 0 or non_cte[0][i] == N + 2:
-                pass
+                continue
             else:
                 if non_cte[1][i] == 0:
                     C[n_count][non_cte[0][i]][0] = w * 0.25 * (
@@ -72,7 +72,7 @@ def growth_model(N, position, w, eta, stop):
             b = sink[1][k]
 
             if a == 0 or a == N + 2 or b == 0 or b == N + 2:
-                pass
+                continue
             else:
                 for i in [a - 1, a + 1]:
                     if cluster[n_count][i][b] == 0 and tag[i][b] == 0:
@@ -130,7 +130,7 @@ def growth_model_steps(N, position, w, eta, stop, steps):
         for i in range(len(non_cte[0])):
 
             if non_cte[0][i] == 0 or non_cte[0][i] == N + 2:
-                pass
+                continue
             else:
                 if non_cte[1][i] == 0:
                     C[n_count][non_cte[0][i]][0] = w * 0.25 * (

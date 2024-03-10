@@ -280,7 +280,6 @@ class SimulationGrid:
         Animates the stepping scheme:
 
         Inputs:
-s
             -   method: If using time_dependent or time_independent
 
             -   method_fun: If time_independent, which method to use

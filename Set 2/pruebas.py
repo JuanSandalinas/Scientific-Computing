@@ -10,7 +10,7 @@ from scipy.sparse import diags
 from scipy.sparse import csr_matrix
 
 class Gray_scott():
-    def __init__(self,N,n_steps,size, dt= 1, dx = 1, Du = 0.16, Dv = 0.08, f =  0.062, k = 0.061):
+    def __init__(self,N,n_steps,size, dt= 1, dx = 1, Du = 0.16, Dv = 0.08, f = 0.035, k = 0.06):
         """
         Does gray scott scheme for th reaction U +2V ->3V and V-> P. 
         With dirichlet boundary conditions and periodic boundary also 
@@ -91,21 +91,48 @@ class Gray_scott():
         ### Begin pre-computations
         f_k = self.f + self.k
         ### End pre-computations
+        Ub = np.copy(self.U)
+        Vb = np.copy(self.V)
+        for s in range(self.n_steps):
+            for i in range(self.N +1):
+                for j in range(self.N +1):
 
-        for i in range(self.n_steps):
+                    if i == 0 or i == self.N:
+                        continue
 
-            term = self.U*self.V*self.V*self.dt
+                    elif j == 0:
+                        term = self.U[i,j]*self.V[i,j]*self.V[i,j]*self.dt
+                        dx_u = self.Du*(self.U[i+1,j] -  2*self.U[i,j] + self.U[i-1,j])/(self.dx**2)
+                        dy_u = self.Du*(self.U[i,j+1] -  2*self.U[i,j] + self.U[i,self.N-1])/(self.dx**2)
+                    
+                        dx_v = self.Dv*(self.V[i+1,j] -  2*self.V[i,j] + self.V[i-1,j])/(self.dx**2)
+                        dy_v = self.Dv*(self.V[i,j+1] -  2*self.V[i,j] + self.V[i,self.N-1])/(self.dx**2)
+                    
+                    elif j == self.N:
+                        term = self.U[i,j]*self.V[i,j]*self.V[i,j]*self.dt
+                        dx_u = self.Du*(self.U[i+1,j] -  2*self.U[i,j] + self.U[i-1,j])/(self.dx**2)
+                        dy_u = self.Du*(self.U[i,1] -  2*self.U[i,j] + self.U[i,self.N-1])/(self.dx**2)
+                    
+                        dx_v = self.Dv*(self.V[i+1,j] -  2*self.V[i,j] + self.V[i-1,j])/(self.dx**2)
+                        dy_v = self.Dv*(self.V[i,1] -  2*self.V[i,j] + self.V[i,j-1])/(self.dx**2)
 
+                    else:
+                        term = self.U[i,j]*self.V[i,j]*self.V[i,j]*self.dt
+                        dx_u = self.Du*(self.U[i+1,j] -  2*self.U[i,j] + self.U[i-1,j])/(self.dx**2)
+                        dy_u = self.Du*(self.U[i,j+1] -  2*self.U[i,j] + self.U[i,j-1])/(self.dx**2)
+                    
+                        dx_v = self.Dv*(self.V[i+1,j] -  2*self.V[i,j] + self.V[i-1,j])/(self.dx**2)
+                        dy_v = self.Dv*(self.V[i,j+1] -  2*self.V[i,j] + self.V[i,j-1])/(self.dx**2)
+                    
+                    Ub[i,j] =  (dx_u + dy_u) -  term + self.f*(1-self.U[i,j])*self.dt - self.U[i,j]
+                    Vb[i,j] =  (dx_v + dy_v) +  term - f_k*self.V[i,j]*self.dt - self.V[i,j]
 
-            Ub =  (self.U @ self.Mx_u + self.My_u @ self.U) -  term + self.f*(1-self.U)*self.dt - self.U
-            Vb =  (self.V @ self.Mx_v + self.My_v @ self.V) +  term - f_k*self.V*self.dt - self.V
-      
+            
             self.U[1:-1, :] = np.copy(Ub[1:-1, :])
             self.V[1:-1, :] = np.copy(Vb[1:-1, :])
-            
 
             self.data_u += [np.copy(self.U)]
-            self.data_v += [np.copy(self.V)]
+            self.data_v += [np.copy(self.U)]
 
     def animation(self,save_animation = False):
         """
@@ -170,8 +197,8 @@ class Gray_scott():
         axs[1].imshow(V, cmap='hot', interpolation='nearest', extent=[0, 1, 0, 1])
 
 if __name__ == "__main__": 
-    
-    dif = Gray_scott(100,50,20)
+
+    dif = Gray_scott(10,50,3)
     dif.simulation()
-    dif.animation()
     
+
