@@ -197,9 +197,7 @@ class Gray_scott():
         axs[1].imshow(V, cmap='hot', interpolation='nearest', extent=[0, 1, 0, 1])
 
 if __name__ == "__main__": 
-
-    dif = Gray_scott(10,50,3)
-    dif.simulation()
-    dif.animation()
-    
+    w = 1.9
+    a = (w/4)*(1 + 0 + 0.475 + 0.88288417)+ (1-w)*0
+    print(a)
 
