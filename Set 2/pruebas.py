@@ -200,5 +200,6 @@ if __name__ == "__main__":
 
     dif = Gray_scott(10,50,3)
     dif.simulation()
+    dif.animation()
     
 

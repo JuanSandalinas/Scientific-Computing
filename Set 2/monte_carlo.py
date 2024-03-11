@@ -183,7 +183,7 @@ class Monte_carlo_dla():
 
 if __name__ == "__main__":
     m = Monte_carlo_dla(100)
-    m.random_walk(20_000, p = 0.7)
+    m.random_walk(50,20_000, p = 0.7)
     m.plot()
 
 

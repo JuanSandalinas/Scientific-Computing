@@ -90,7 +90,6 @@ def sor(C,object_,w,stop,store_step = 1):
         n_count += 1 
         C_b = np.copy(C)
         for i in np.unique(non_cte[0]):
-            
             for j in non_cte[1][non_cte[0] == i]:
                 if j == 0:
                     C[i,0] = (w/4)*(C[i+1,0] + C[i-1,0] + C[i,1] + C[i,-2]) + (1-w)*C[i,0]

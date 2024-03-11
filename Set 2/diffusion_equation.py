@@ -19,7 +19,7 @@ from scipy.sparse import csr_matrix
 class SimulationGrid:
 
 
-    def __init__(self, N, D = 1):
+    def __init__(self, N, D = 1,):
         """
 
         Creates a simulation grid.
@@ -33,21 +33,12 @@ class SimulationGrid:
             - object_: Matrix that specifies sink points. 0 means the state changes, 1 means it does not and it is fixde
         """
 
-        self.D = 1
-
-        self.dx = 1/N
 
         self.N = N
 
         self.initialize()
-
-        self.data = [self.A] #For simulations
-
-        self.data_especial = [] #To store the time at 0.1,0.001,....
-
-        self.particles = np.zeros((self.N+1,self.N+1))
-
-
+        self.dla(int(self.N/2))
+        self.data = [self.C] #For simulations
 
 
     def initialize(self):
@@ -56,37 +47,28 @@ class SimulationGrid:
         object_ matrix specifies which points need to be updated
         """
 
-        A = np.zeros((self.N+1, self.N+1))
+        C = np.zeros((self.N+3, self.N+3))
+        number = 23
+        C[1,:] = 1
+        
+        C[0,:] = number
+        C[-1,:] = number
+        C[:,0] = number
+        C[:,-1] = number
 
-        A[0,:] = 1
+        self.C = C
 
-        self.A = A
+        cluster = np.zeros((self.N+3, self.N+3))
 
+        cluster[1,:] = 1
+        cluster[-2,:] = 1
 
-        object_ = np.copy(A)
+        cluster[0,:] = 23
+        cluster[-1,:] = number
+        cluster[:,0] = number
+        cluster[:,-1] = number
 
-        object_[-1,:] = 1
-
-        self.object_ = object_
-    
-
-    def square(self, size, position):
-        """
-
-        Puts a square of a specific size, the grid.
-
-        Inputs:
-
-            - size: Size of the square
-
-            - position: Upper left vertex of the square position
-        """
-
-        if (size + position[0]) >= (self.N-1) or (size + position[1]) >= (self.N-1) :
-
-            raise Exception ("Object does not fit") 
-
-        self.object_[position[0]:position[0]+size,position[1]:position[1]+size]  = np.ones((size, size))
+        self.cluster = cluster
     
        
     
@@ -100,15 +82,46 @@ class SimulationGrid:
             - position: Tuple of two points
         """
 
-        if (position[0]) >= (self.N-1) or (position[1]) >= (self.N-1) :
+        self.cluster[-2,position] = 2
 
-            raise Exception ("Outside bounds")
+    def sor(self,w,stop):
+        """
+        Performs Successive over relaxation.
+        Inputs:
+            - C: Matrix A with all values
+            - w: weight
+            - stop: simulation stopper
+        """
+        A = np.copy(self.C)
+        n_count = 0
+        non_cte = np.where(self.cluster == 0)
 
-        self.object_[position[0], position[1]] = 1
+        while True:
+            n_count += 1 
+            A_b = np.copy(A)
+            for i in np.unique(non_cte[0]):
+                for j in non_cte[1][non_cte[0] == i]:
+                    if j == 1:
+                        A[i,1] = (w/4)*(A[i+1,1] + A[i-1,1] + A[i,2] + A[i,-3]) + (1-w)*A[i,1]
+
+        
+                    elif j == (A.shape[0]-2):
+                        A[i,-2] = (w/4)*(A[i+1,-2] + A[i-1,-2] + A[i,2] + A[i,-3]) + (1-w)*A[i,-1]
+                        
+            
+                    else:
+                        A[i,j] = (w/4)*(A[i+1,j] + A[i-1,j] + A[i,j+1] + A[i,j-1])+ (1-w)*A[i,j]
+            
+            if n_count%1000 == 0:
+                print(A)
+    
+            if np.allclose(A, A_b, atol=stop):
+                self.C = np.copy(A)
+                self.data += [np.copy(A)]
+                break
 
 
-
-    def time_independent(self,method_fun,*args,stop = 0.00001, **kwargs):
+    def growth_model(self,w,eta, stop = 0.0001):
         """
 
         Executes a time_step ing method given a function
@@ -122,122 +135,45 @@ class SimulationGrid:
             - store_step: Every how many steps store data
         """
 
-        self.data = [self.A]
-
-        C = np.copy(self.A)
-
         n_count = 0
 
         self.iterations = []
+        for i in range(1):
+            self.sor(w,stop)
+            
+            # Finding all the candidates
+            sink = np.where(self.cluster == 2)
+            candidate_0 = [] # ROW
+            candidate_1 = [] # Column
+            c_candidate = 0
+            tag = np.zeros((self.N + 3, self.N + 3)) 
 
-        for A_t in method_fun(*args, C=C,stop=stop,object_ = self.object_,**kwargs):
+            for k in range(len(sink[0])):
+                a = sink[0][k]
+                b = sink[1][k]
 
-            self.data.append(np.copy(A_t[0]))
+                if a == 0 or a == self.N + 2 or b == 0 or b == self.N + 2:
+                    continue
+                else:
+                    for i in [a - 1, a + 1]:
+                        if self.cluster[i][b] == 0 and tag[i][b] == 0:
+                            candidate_0.append(i)
+                            candidate_1.append(b)
+                            tag[i][b] = 1
+                            c_candidate += self.C[candidate_0[-1]][candidate_1[-1]]
+                    for j in [b - 1, b + 1]:
+                        if self.cluster[a][j] == 0 and tag[a][j] == 0:
+                            candidate_0.append(a)
+                            candidate_1.append(j)
+                            tag[a][j] = 1
+                            c_candidate += self.C[candidate_0[-1]][candidate_1[-1]]
 
-            self.iterations.append(A_t[1])
-
+            # calculating the probability of becoming a sink for candidates
+            for k in range(len(candidate_0)):
+                if (self.C[candidate_0[k]][candidate_1[k]] ** eta) / c_candidate > np.random.uniform(0,1):
+                    self.C[candidate_0[k]][candidate_1[k]] = 0
+                    self.cluster[candidate_0[k]][candidate_1[k]] = 2
     
-
-    def time_dependent_matrix(self):
-        """
-
-        Creates the matrices for time dependent difference scheme
-        """
-
-
-        diagonals = [np.ones(self.N), np.ones(self.N)]
-        M1 = diags(diagonals , [-1, 1])
-        M2 = diags(diagonals, [-1,1]).toarray()
-
-
-        ## Cyclic boundary conditions
-
-        M2[-2,0] = 1
-        M2[1,-1] = 1
-
-        ## Periodic boundary conditions
-
-        self.M1 = M1
-
-        self.M2 = M2
-
-
-    def time_dependent_step(self,C):
-        """
-
-        Does on step of the time dependent difference scheme
-
-        Inputs:
-
-            - C: Matrix C, which is A over time
-
-        Outputs:
-
-            - C: Matrix C after one step
-        """
-
-        c1=  self.M1@C
-
-        c2 = C@self.M2
-
-        non_cte = np.where(self.object_ == 0)
-
-        C[non_cte[0],non_cte[1]] = (C + self.term*(c1 + c2 - 4*C))[non_cte[0],non_cte[1]]
-
-        return C
-    
-
-    
-
-    def time_dependent(self,t,dt = 0.0001, time_list = [0.001,0.01,0.1,1.0]):
-        """
-
-        Does time dependent stepping scheme.
-
-        Inputs:
-
-            - t: total time
-
-            - dt: Time step in seconds
-
-            - time_list: times to store
-        """
-
-        self.data = [self.A]
-
-        self.term = (dt*self.D)/(self.dx**2)
-
-        self.time_dependent_matrix()
-
-
-        if 4*self.term > 1:
-
-            raise Exception ("Not stable system")
-
-
-        C = np.copy(self.A)
-
-        n_steps = int(t/dt)
-
-
-
-        for k in range(n_steps):
-
-            C = self.time_dependent_step(C)
-
-            if k%20 == 0:
-
-                self.data.append(np.copy(C))
-
-            if k*dt in time_list:
-
-                self.data_especial.append(np.copy(C))
-
-                print(k*dt)
-
-            if k == n_steps -1:
-
-                self.data_especial.append(np.copy(C))
 
 
 
@@ -273,78 +209,19 @@ class SimulationGrid:
 
         return np.array(lst)
 
+    def plot(self):
+        fig, ax = plt.subplots()
+        ax.imshow(self.C[1:-1, 1:-1], cmap='hot', interpolation='nearest', extent=[0, 1, 0, 1])
+        plt.show()    
 
-    def animation(self,method,method_fun = None,t = 1.5,save_animation = False):
-        """
-
-        Animates the stepping scheme:
-
-        Inputs:
-            -   method: If using time_dependent or time_independent
-
-            -   method_fun: If time_independent, which method to use
-
-            -   t: Total animation time
-
-            -   dt: Time stepping size
-
-            -   save_animation: True == it will save the animation, default is False
-        """
-
-        fig, ax = plt.subplots()       
-
-        C = np.copy(self.A)
-
-        if method == "time_dependent":
-            self.time_dependent(t)
-
-        elif method == "time_independent":
-
-            self.time_independent(method_fun)
-        n_steps = len(self.data)
-        
-
-        C = np.copy(self.A)
-        
-
-        ax.imshow(C, cmap='plasma', interpolation='nearest', extent=[0, 1, 0, 1])
-
-        ax.set_xlabel('X')  
-
-        ax.set_ylabel('Y')  
-
-        ax.set_title('Time: 0 s') 
-        
-
-        anim = animation.FuncAnimation(fig,self.frame, fargs= (ax,), frames=int(n_steps), interval = 0.000000001)
-
-
-        if save_animation == True:
-
-            print("Starting ")
-
-            anim.save('time_dependent_diffusion_animation.mp4', fps=60)
-            plt.close()
-
-
-    def frame(self, iteration, ax):
-
-        C = self.data[iteration]
-
-        ax.clear()
-
-        ax.set_title(f'Time dependent(t={np.round(iteration*0.0001*50, 7)}) s')
-
-        ax.imshow(C, cmap='hot', interpolation='nearest', extent=[0, 1, 0, 1])
-
-
+ 
  
 
 if __name__ == "__main__": 
 
-    dif = SimulationGrid(50)
-
-    dif.animation("time_dependent",save_animation=True)
+    dif = SimulationGrid(5)
+    dif.growth_model(w = 1.9, eta = 0.8)
+    dif.plot()
 
 
         
