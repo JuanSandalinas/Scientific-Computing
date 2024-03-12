@@ -77,8 +77,6 @@ def growth_model(N, position,w,eta, grow_steps = 10, D = 1):
     cluster[-2,position] = 2
 
     n_count = 0
-
-    
     for i in range(1,grow_steps):
         C = sor(C,cluster,w)
         

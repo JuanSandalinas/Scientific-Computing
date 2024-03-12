@@ -10,6 +10,8 @@ from scipy.sparse import diags
 
 from scipy.sparse import csr_matrix
 
+
+
 class Monte_carlo_dla():
     def __init__(self, N, n_particles, p= 1, auto = True):
         """
@@ -38,10 +40,6 @@ class Monte_carlo_dla():
             - position: Initial position
         """
 
-        #if (position[0] >= (self.N-1)) or (position[1] >= (self.N-1)):
-
-            #raise Exception ("Outside bounds")
-
         self.A[self.N, position] = 2
 
     
@@ -56,6 +54,7 @@ class Monte_carlo_dla():
         self.particle_pos = [1,np.random.randint(0,self.N)]
         self.A[self.particle_pos[0],self.particle_pos[1]] = 1
     
+
     def clustering(self):
         """
         Returns true or false
@@ -74,7 +73,6 @@ class Monte_carlo_dla():
             return True, int(3)
         else:
             return False, int(-1)
-
 
     def random_walk_step(self):
         """
@@ -110,7 +108,6 @@ class Monte_carlo_dla():
                     self.particle_pos += moves[move]
                     self.A[self.particle_pos[0],self.particle_pos[1]] = 1
                     continue
-            
     def random_walk(self):
         """
         Initializes the random walk simulation with n_particles
@@ -120,7 +117,8 @@ class Monte_carlo_dla():
         for _ in range(self.n_particles):
             self.particle_creation()
             self.random_walk_step()
-
+        print(f"Done with {self.n_particles} ")
+    
     def plot(self):
         """
         Plots the current matrix A
@@ -131,59 +129,10 @@ class Monte_carlo_dla():
         plt.show()
 
 
-
-    def animation(self,save_animation = False):
-        """
-
-        Animates the stepping scheme:
-
-        Inputs:
-
-            -   save_animation: True == it will save the animation, default is False
-        """
-
-        fig, ax = plt.subplots()       
-
-        n_steps = len(self.data)
-        
-
-        C = np.copy(self.data[0])
-        
-
-        ax.imshow(C, cmap = plt.cm.colors.ListedColormap(['darkblue', 'white', 'yellow']), interpolation='nearest', extent=[0, 1, 0, 1])
-
-        ax.set_xlabel('X')  
-
-        ax.set_ylabel('Y')  
-
-        ax.set_title('Time: 0 s') 
-        
-
-        anim = animation.FuncAnimation(fig,self.frame, fargs= (ax,), frames=int(n_steps), interval = 0.0000001)
-        plt.show()
-
-        if save_animation == True:
-
-            print("Starting ")
-
-            anim.save('time_dependent_diffusion_animation.mp4', fps=60)
-            plt.close()
-
-
-    def frame(self, iteration, ax):
-
-        C = self.data[iteration]
-
-        ax.clear()
-
-        ax.set_title(f'{iteration}')
-
-        ax.imshow(C, cmap= plt.cm.colors.ListedColormap(['darkblue', 'white', 'yellow']), interpolation='nearest', extent=[0, 1, 0, 1])
-
-
 if __name__ == "__main__":
-    m = Monte_carlo_dla(100)
-    m.random_walk(50,20_000, p = 0.7)
-    m.plot()
+    N = 100
+    n_particles_list = [20_000,40_000,60_000,80_000]
+    p = 1
+    monte_carlos = black_scholes = np.vectorize(Monte_carlo_dla, excluded=['N'])(N,n_particles_list)
 
 
