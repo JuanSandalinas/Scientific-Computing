@@ -1,6 +1,9 @@
 import numpy as np
 from random import random
+from numba import jit
 
+
+@jit(nopython=True, parallel = False)
 def sor(C, cluster,w,stop = 0.0001):
     """
     Performs Successive over relaxation.
@@ -10,14 +13,15 @@ def sor(C, cluster,w,stop = 0.0001):
         - w: weight
         - stop: simulation stopper
     """
+
     
-    A = np.copy(C)
+    A = C.copy()
     n_count = 0
     non_cte = np.where(cluster == 0)
 
     while True:
         n_count += 1 
-        A_b = np.copy(A)
+        A_b = A.copy()
         for i in np.unique(non_cte[0]):
             for j in non_cte[1][non_cte[0] == i]:
                 if j == 1:
@@ -28,9 +32,13 @@ def sor(C, cluster,w,stop = 0.0001):
                 else:
                     A[i,j] = (w/4)*(A[i+1,j] + A[i-1,j] + A[i,j+1] + A[i,j-1])+ (1-w)*A[i,j]
         
-        if np.allclose(A, A_b, atol=stop):
-             return A
-      
+        max_diff = np.max(np.abs(A - A_b))
+        
+        if  max_diff <= stop:
+            return A
+            break
+
+@jit(nopython=True, parallel = False)  
 def growth_model(N,w,eta, grow_steps = 1000, D = 1):
     """
 
@@ -52,7 +60,7 @@ def growth_model(N,w,eta, grow_steps = 1000, D = 1):
     C[:,0] = number
     C[:,-1] = number
 
-    data = [np.copy(C)] ### List with the the matrix C in each iteration
+    data = [C.copy()]
     
     cluster = np.zeros((N+3, N+3)) ## Matrix with points. 1 is limit, 2 is sink point, 0 is nothing
 
@@ -67,9 +75,8 @@ def growth_model(N,w,eta, grow_steps = 1000, D = 1):
     n_count = 0
 
     
-    for i in range(grow_steps):
-        C = sor(w,stop)
-        data += [np.copy(C)]
+    for i in range(1,grow_steps):
+        C = sor(C,cluster,w)
         
         # Finding all the candidates
         sink = np.where(cluster == 2)
@@ -103,8 +110,9 @@ def growth_model(N,w,eta, grow_steps = 1000, D = 1):
             if (C[candidate_0[k]][candidate_1[k]] ** eta) / c_candidate > np.random.uniform(0,1):
                 C[candidate_0[k]][candidate_1[k]] = 0
                 cluster[candidate_0[k]][candidate_1[k]] = 2
+        data += [C.copy()]
 
-return [C, cluster, n_count]
+    return C, cluster, data
 
 
 def merge(C, cluster, n_count):
@@ -116,3 +124,10 @@ def merge(C, cluster, n_count):
         C[n_count][sink[0][i]][sink[1][i]] = 1
 
     return C[n_count]
+
+if __name__ == "__main__":
+    N = 25
+    w = 1.9
+    eta = 0.8
+    result = growth_model(N,w,eta)
+    
