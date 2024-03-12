@@ -10,7 +10,7 @@ from scipy.sparse import diags
 from scipy.sparse import csr_matrix
 
 class Gray_scott():
-    def __init__(self,N,n_steps,size, dt= 1, dx = 1, Du = 0.16, Dv = 0.08, f =  0.062, k = 0.061):
+    def __init__(self,N,size, dt= 1, dx = 1, Du = 0.16, Dv = 0.08, f =  0.035, k = 0.06):
         """
         Does gray scott scheme for th reaction U +2V ->3V and V-> P. 
         With dirichlet boundary conditions and periodic boundary also 
@@ -26,7 +26,6 @@ class Gray_scott():
             - size: Square size for V
         """
         self.N = N
-        self.n_steps = n_steps
         self.dt = dt 
         self.dx = dx
         self.dy = dx
@@ -46,7 +45,9 @@ class Gray_scott():
             - size: int square size
         *Note: If size is bigger than matrix will give error
         """
-        self.U = np.full((self.N+1,self.N+1),0.5)
+        noise_u = np.random.normal(loc=0, scale=0.5 / 3)
+        noise_v = np.random.normal(loc=0, scale=0.75 / 3)
+        self.U = np.full((self.N+1,self.N+1),0.5+ noise_u)
         self.V = np.zeros((self.N+1,self.N+1))
         
         center_xy = (self.N+1)// 2
@@ -54,7 +55,7 @@ class Gray_scott():
         up_xy = center_xy + self.size//2
         down_xy = center_xy - self.size//2
 
-        self.V[down_xy:up_xy, down_xy:up_xy] = 0.25
+        self.V[down_xy:up_xy, down_xy:up_xy] = 0.25 + noise_v
 
     def matrices(self):
         """
@@ -73,6 +74,9 @@ class Gray_scott():
         Mx[-2,0] = cx
         Mx[1,-1] = cx
 
+        self.Mx = Mx
+        self.My = My
+
         self.Mx_u = Mx*self.Du
         self.My_u = My*self.Du
         
@@ -80,10 +84,11 @@ class Gray_scott():
         self.My_v = My*self.Dv
 
 
-    def simulation(self,safe_data = 1):
+    def simulation(self,stop = 0.000001, safe_data = 1):
         """
         Does one simulation
         Inputs:
+            - stop: When to stop the simulation
             - safe_data: Interval to save data, default is one
         """
         self.matrices()
@@ -91,21 +96,28 @@ class Gray_scott():
         ### Begin pre-computations
         f_k = self.f + self.k
         ### End pre-computations
-
-        for i in range(self.n_steps):
-
+        self.n_count = 0
+        while True:
+            self.n_count += 1
             term = self.U*self.V*self.V*self.dt
 
+            Ub =  self.Du*(self.U @ self.Mx + self.My @ self.U) -  term + self.f*(1-self.U)*self.dt + self.U
+            Vb =  self.Dv*(self.V @ self.Mx + self.My @ self.V) +  term - f_k*self.V*self.dt + self.V
 
-            Ub =  (self.U @ self.Mx_u + self.My_u @ self.U) -  term + self.f*(1-self.U)*self.dt - self.U
-            Vb =  (self.V @ self.Mx_v + self.My_v @ self.V) +  term - f_k*self.V*self.dt - self.V
-      
+
+            max_diff = np.max(np.abs(self.U[1:-1, :] - Ub[1:-1, :]))
+        
+            if  max_diff <= stop:
+                self.U[1:-1, :] = np.copy(Ub[1:-1, :])
+                self.V[1:-1, :] = np.copy(Vb[1:-1, :])
+                break
+            
             self.U[1:-1, :] = np.copy(Ub[1:-1, :])
             self.V[1:-1, :] = np.copy(Vb[1:-1, :])
             
-
-            self.data_u += [np.copy(self.U)]
-            self.data_v += [np.copy(self.V)]
+            if self.n_count%safe_data == 0:
+                self.data_u += [np.copy(self.U)]
+                self.data_v += [np.copy(self.V)]
 
     def animation(self,save_animation = False):
         """
@@ -131,8 +143,8 @@ class Gray_scott():
         V = np.copy(self.data_v[0])
 
         n_steps = len(self.data_u)
-        axs[0].imshow(U, cmap='hot', interpolation='nearest', extent=[0, 1, 0, 1])
-        axs[1].imshow(V, cmap='hot', interpolation='nearest', extent=[0, 1, 0, 1])
+        axs[0].imshow(U, cmap='plasma', extent=[0, 1, 0, 1])
+        axs[1].imshow(V, cmap= 'plasma', extent=[0, 1, 0, 1])
 
         for ax in axs:
 
@@ -144,15 +156,16 @@ class Gray_scott():
         axs[1].set_title('V Time: 0 s')
         
 
-        anim = animation.FuncAnimation(fig,self.frame, fargs= (axs,), frames=int(n_steps), interval = 100)
+        anim = animation.FuncAnimation(fig,self.frame, fargs= (axs,), frames=int(n_steps), interval = 0.00001)
 
-        plt.show()
         if save_animation == True:
 
             print("Starting ")
 
             anim.save('time_dependent_diffusion_animation.mp4', fps=60)
             plt.close()
+        else:
+            plt.show()
 
 
     def frame(self, iteration, axs):
@@ -166,12 +179,12 @@ class Gray_scott():
         axs[0].set_title(f'U {iteration} ')
         axs[1].set_title(f'V {iteration}')
 
-        axs[0].imshow(U, cmap='hot', interpolation='nearest', extent=[0, 1, 0, 1])
-        axs[1].imshow(V, cmap='hot', interpolation='nearest', extent=[0, 1, 0, 1])
+        axs[0].imshow(U, cmap='plasma', extent=[0, 1, 0, 1])
+        axs[1].imshow(V, cmap='plasma', extent=[0, 1, 0, 1])
 
 if __name__ == "__main__": 
     
-    dif = Gray_scott(100,50,20)
-    dif.simulation()
-    dif.animation()
+    dif = Gray_scott(100,20)
+    dif.simulation(safe_data=1)
+    dif.animation(save_animation=False)
     

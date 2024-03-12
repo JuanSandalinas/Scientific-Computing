@@ -1,1 +1,1 @@
-Gray_scott(100,50,10)
+data

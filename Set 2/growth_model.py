@@ -1,5 +1,6 @@
 import numpy as np
 from random import random
+import matplotlib.pyplot as plt
 from numba import jit
 
 
@@ -35,11 +36,11 @@ def sor(C, cluster,w,stop = 0.0001):
         max_diff = np.max(np.abs(A - A_b))
         
         if  max_diff <= stop:
-            return A
+            return A.copy()
             break
 
 @jit(nopython=True, parallel = False)  
-def growth_model(N,w,eta, grow_steps = 1000, D = 1):
+def growth_model(N, position,w,eta, grow_steps = 10, D = 1):
     """
 
     Executes a time_step ing method given a function
@@ -62,6 +63,7 @@ def growth_model(N,w,eta, grow_steps = 1000, D = 1):
 
     data = [C.copy()]
     
+    
     cluster = np.zeros((N+3, N+3)) ## Matrix with points. 1 is limit, 2 is sink point, 0 is nothing
 
     cluster[1,:] = 1
@@ -71,6 +73,8 @@ def growth_model(N,w,eta, grow_steps = 1000, D = 1):
     cluster[-1,:] = number
     cluster[:,0] = number
     cluster[:,-1] = number
+
+    cluster[-2,position] = 2
 
     n_count = 0
 
@@ -110,7 +114,8 @@ def growth_model(N,w,eta, grow_steps = 1000, D = 1):
             if (C[candidate_0[k]][candidate_1[k]] ** eta) / c_candidate > np.random.uniform(0,1):
                 C[candidate_0[k]][candidate_1[k]] = 0
                 cluster[candidate_0[k]][candidate_1[k]] = 2
-        data += [C.copy()]
+        data.append(C.copy())
+        
 
     return C, cluster, data
 
@@ -126,8 +131,15 @@ def merge(C, cluster, n_count):
     return C[n_count]
 
 if __name__ == "__main__":
-    N = 25
+    N = 10
     w = 1.9
     eta = 0.8
-    result = growth_model(N,w,eta)
+    result = growth_model(N, 3,w,eta)
+    data = result[2]
+    
+    fig, ax = plt.subplots()
+    ax.imshow(result[0][1:-1, 1:-1], cmap='hot', interpolation='nearest', extent=[0, 1, 0, 1])
+    plt.show()  
+
+
     
