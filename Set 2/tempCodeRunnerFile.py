@@ -84,7 +84,7 @@ class Gray_scott():
         self.My_v = My*self.Dv
 
 
-    def simulation(self,stop = 0.00001, safe_data = 1):
+    def simulation(self,stop = 0.000001, safe_data = 1):
         """
         Does one simulation
         Inputs:
@@ -105,17 +105,15 @@ class Gray_scott():
             Vb =  self.Dv*(self.V @ self.Mx + self.My @ self.V) +  term - f_k*self.V*self.dt + self.V
 
 
-            max_diff = np.max(np.abs(self.U - Ub))
+            max_diff = np.max(np.abs(self.U[1:-1, :] - Ub[1:-1, :]))
         
             if  max_diff <= stop:
-                self.U = np.copy(Ub)
-                self.V = np.copy(Vb)
-                self.data_u += [np.copy(self.U)]
-                self.data_v += [np.copy(self.V)]
+                self.U[1:-1, :] = np.copy(Ub[1:-1, :])
+                self.V[1:-1, :] = np.copy(Vb[1:-1, :])
                 break
             
-            self.U = np.copy(Ub)
-            self.V = np.copy(Vb)
+            self.U[1:-1, :] = np.copy(Ub[1:-1, :])
+            self.V[1:-1, :] = np.copy(Vb[1:-1, :])
             
             if self.n_count%safe_data == 0:
                 self.data_u += [np.copy(self.U)]
@@ -190,7 +188,6 @@ if __name__ == "__main__":
     dif.simulation(safe_data=1)
     fig, axs = plt.subplots(1,2)
     axs = axs.flatten()
-    axs[0].imshow(dif.data_u[-1], cmap='plasma', extent=[0, 1, 0, 1])
-    axs[1].imshow(dif.data_v[-1], cmap='plasma', extent=[0, 1, 0, 1])
-    plt.show()
+    axs[0].imshow(dif.U, cmap='plasma', extent=[0, 1, 0, 1])
+    axs[1].imshow(dif.V, cmap='plasma', extent=[0, 1, 0, 1])
     

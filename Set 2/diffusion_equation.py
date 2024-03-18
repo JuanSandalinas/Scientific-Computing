@@ -38,7 +38,11 @@ class SimulationGrid:
 
         self.initialize()
         self.dla(int(self.N/2))
+<<<<<<< HEAD
         self.data = [self.C] #For simulations
+=======
+        self.data = [np.copy(self.C)] #For simulations
+>>>>>>> 16952a5514cfb7a02e6bdeef105963577a71f82e
 
 
     def initialize(self):
@@ -48,7 +52,11 @@ class SimulationGrid:
         """
 
         C = np.zeros((self.N+3, self.N+3))
+<<<<<<< HEAD
         number = 23
+=======
+        number = 20
+>>>>>>> 16952a5514cfb7a02e6bdeef105963577a71f82e
         C[1,:] = 1
         
         C[0,:] = number
@@ -63,7 +71,11 @@ class SimulationGrid:
         cluster[1,:] = 1
         cluster[-2,:] = 1
 
+<<<<<<< HEAD
         cluster[0,:] = 23
+=======
+        cluster[0,:] = number
+>>>>>>> 16952a5514cfb7a02e6bdeef105963577a71f82e
         cluster[-1,:] = number
         cluster[:,0] = number
         cluster[:,-1] = number
@@ -92,6 +104,10 @@ class SimulationGrid:
             - w: weight
             - stop: simulation stopper
         """
+<<<<<<< HEAD
+=======
+        
+>>>>>>> 16952a5514cfb7a02e6bdeef105963577a71f82e
         A = np.copy(self.C)
         n_count = 0
         non_cte = np.where(self.cluster == 0)
@@ -104,6 +120,7 @@ class SimulationGrid:
                     if j == 1:
                         A[i,1] = (w/4)*(A[i+1,1] + A[i-1,1] + A[i,2] + A[i,-3]) + (1-w)*A[i,1]
 
+<<<<<<< HEAD
         
                     elif j == (A.shape[0]-2):
                         A[i,-2] = (w/4)*(A[i+1,-2] + A[i-1,-2] + A[i,2] + A[i,-3]) + (1-w)*A[i,-1]
@@ -115,6 +132,13 @@ class SimulationGrid:
             if n_count%1000 == 0:
                 print(A)
     
+=======
+                    elif j == (A.shape[0]-2):
+                        A[i,-2] = (w/4)*(A[i+1,-2] + A[i-1,-2] + A[i,2] + A[i,-3]) + (1-w)*A[i,-2]
+                    else:
+                        A[i,j] = (w/4)*(A[i+1,j] + A[i-1,j] + A[i,j+1] + A[i,j-1])+ (1-w)*A[i,j]
+            
+>>>>>>> 16952a5514cfb7a02e6bdeef105963577a71f82e
             if np.allclose(A, A_b, atol=stop):
                 self.C = np.copy(A)
                 self.data += [np.copy(A)]
@@ -138,9 +162,15 @@ class SimulationGrid:
         n_count = 0
 
         self.iterations = []
+<<<<<<< HEAD
         for i in range(1):
             self.sor(w,stop)
             
+=======
+        for i in range(100):
+            self.sor(w,stop)
+            self.plot()
+>>>>>>> 16952a5514cfb7a02e6bdeef105963577a71f82e
             # Finding all the candidates
             sink = np.where(self.cluster == 2)
             candidate_0 = [] # ROW
@@ -218,10 +248,15 @@ class SimulationGrid:
  
 
 if __name__ == "__main__": 
+<<<<<<< HEAD
 
     dif = SimulationGrid(5)
     dif.growth_model(w = 1.9, eta = 0.8)
     dif.plot()
+=======
+    dif = SimulationGrid(25)
+    dif.growth_model(w = 1.9, eta = 0.8)
+>>>>>>> 16952a5514cfb7a02e6bdeef105963577a71f82e
 
 
         

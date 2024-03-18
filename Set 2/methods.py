@@ -103,8 +103,12 @@ def sor(C,object_,w,stop,store_step = 1):
         if np.allclose(C, C_b, atol=stop):
             yield (C,n_count)
             break
+
         if n_count%store_step == 0:
             yield (C,n_count)
+    
+   
+
 
 
     
