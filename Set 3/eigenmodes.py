@@ -1,119 +1,126 @@
 if __name__ == "__main__":
 
     import numpy as np
+    from scipy.sparse import diags
+    from scipy.sparse import csr_array
+    from scipy import special as sp
+    import math
 
-    # import math
-
-    # import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt
 
 
 class SimulationGrid:
 
 
-    def __init__(self, N):
+    def __init__(self, N, _type = 'Square'):
         """
 
         Creates a simulation grid.
 
         Inputs:
 
-            - N: How many intervals divide space
-
-            - D: Parameter , default set to 1
-
-            - object_: Matrix that specifies sink points. 0 means the state changes, 1 means it does not and it is fixde
+            - N: Square size, rectangle shape or circle diameter.
         """
 
 
-        self.N = N
-        #self.dt = dt
-
-        self.initialize()
-        # self.data = [np.copy(self.C)] #For simulations
+        self.N = N-1
+        self.initialize(_type)
+        self.data = [np.copy(self.v)] #For simulations
 
 
-    def initialize(self):
+    def initialize(self,  _type):
         """
-        Initializes matrix with all 0 concentrations except 1 on first row
-        object_ matrix specifies which points need to be updated
+        Initializes the v vector and M matrix in function of the type of grid
+        """
+        if _type == 'Square':
+            self.m_square()
+        elif _type == 'Rectangle':
+            self.m_rectangle()
+        elif _type == 'Circle':
+            self.m_circle()
+
+    def m_square(self):
+        """
+        Considers the grid as a square of size N, without considering boundaries
+        """
+        self.v = np.zeros(self.N**2)
+        d = [np.ones(v.shape[0]- self.N),np.ones(v.shape[0]-1),
+                np.full(v.shape[0],-4),np.ones(v.shape[0]-1),np.ones(v.shape[0] - self.N)]
+        self.M = diags(d , [-self.N,-1,0,1,self.N])
+    
+    def m_rectangle(self):
+        """
+        Considers the grid as a rectangle of heigh of N and length 2*N, without considering boundaries
+        """
+        self.v = np.zeros(self.N*self.N*2)
+        d = [np.ones(v.shape[0] - self.N*2),np.ones(v.shape[0]-1),
+                np.full(v.shape[0],-4),np.ones(v.shape[0]-1),np.ones(v.shape[0]- self.N*2)]
+        self.M = diags(d , [-self.N*2,-1,0,1,self.N*2])
+    
+    def m_circle(self):
+        """
+        Considers the grid as a circle of diameter N, without considering boundaries
+        """
+        self.v = np.zeros(np.pi*self.N/2)
+        d = [np.ones(v.shape[0] - self.N*2),np.ones(v.shape[0]-1),
+                np.full(v.shape[0],-4),np.ones(v.shape[0]-1),np.ones(v.shape[0]- self.N*2)]
+        self.M = diags(d , [-self.N*2,-1,0,1,self.N*2])
+
+
+    
+    def animation(self,save_animation = False):
         """
 
-        self.data = np.zeros((self.N+1, self.N+1))
+        Animates the stepping scheme:
+
+        Inputs:
+
+            -   method: If using time_dependent or time_independent
+
+            -   save_animation: True == it will save the animation, default is False
+        """
+
+        fig, ax = plt.subplots()       
+
+        C = np.copy(self.data)
 
 
+        C = np.copy(self.A)
+        
 
-    def m_generator(self):
+        ax.imshow(C, cmap='hot', interpolation='nearest', extent=[0, 1, 0, 1])
 
-        v = np.copy(self.data)
+        ax.set_xlabel('X')  
 
-        for i in self.N:
+        ax.set_ylabel('Y')  
 
-            for j in self.N:
+        ax.set_title('Time: 0 s') 
+        
 
-                if j == i:
-
-                    v[i, j] = -4
-
-                elif j == i - 1 or j == i + 1:
-
-                    v[i, j] = 1
-
-        self.data = v
+        anim = animation.FuncAnimation(fig,self.frame, fargs= (ax,), frames=int(n_steps), interval = 0.000000001)
 
 
+        if save_animation == True:
+
+            print("Starting ")
+
+            anim.save('time_dependent_diffusion_animation.mp4', fps=60)
+            plt.close()
 
 
-    def boundary_rectangle(self, length = 1, width = 2):
+    def frame(self, iteration, ax):
 
-        v = self.data
+        C = self.data[iteration]
 
-        for i in self.N:
+        ax.clear()
 
-            for j in self.N:
+        ax.set_title(f'Time dependent(t={np.round(iteration*0.0001*50, 7)}) s')
 
-                if j < width or j > width or i < length or i > length:
-
-                    v[i, j] = 0
-
-        self.data = v
-
-
-
-    def boundary_circle(self, radius = 1):
-
-        v = self.data
-
-        for i in self.N:
-
-            for j in self.N:
-
-                if abs(self.N / 2 - i) ** 2 + abs(self.N / 2 - j) ** 2 > radius:
-
-                    v[i, j] = 0
-
-        self.data = v
-
-
-
-    def eigenvalue(self, Type):
-
-        A = self.data
-
-        if Type == 'Rectangle':
-
-            np.linalg.eigh(A)
-
-        else:
-
-            np.linalg.eig(A)
-
-        self.data = A
+        ax.imshow(C, cmap='hot', interpolation='nearest', extent=[0, 1, 0, 1])
 
 
 
 
 
 if __name__ == "__main__":
-    dif = SimulationGrid(25)
-    dif.m_generator()
-    dif.eigenvalue('Rectangle')
+    dif = SimulationGrid(3)
