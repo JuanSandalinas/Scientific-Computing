@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="87d864fe-34ac-4cb2-ad3c-479c88156106" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/Set 1/Questions_Set_1.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Set 1/Questions_Set_1.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Set 1/questions2.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Set 1/questions2.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Set 2/Questions_Set_2.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Set 2/Questions_Set_2.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Set 2/diffusion_equation.py" beforeDir="false" afterPath="$PROJECT_DIR$/Set 2/diffusion_equation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Set 2/growth_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/Set 2/growth_model.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2d28xJS0jVmggID9oyFBBmj7VH9" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "settings.editor.selected.configurable": "configurable.group.project",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="87d864fe-34ac-4cb2-ad3c-479c88156106" name="Changes" comment="" />
+      <created>1709195057902</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1709195057902</updated>
+      <workItem from="1709195059552" duration="14471000" />
+      <workItem from="1709307308633" duration="101000" />
+      <workItem from="1709563705916" duration="376000" />
+      <workItem from="1709564103820" duration="4578000" />
+      <workItem from="1709596449037" duration="1041000" />
+      <workItem from="1709738546545" duration="5000" />
+      <workItem from="1709929012499" duration="437000" />
+      <workItem from="1710188616195" duration="1635000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>
