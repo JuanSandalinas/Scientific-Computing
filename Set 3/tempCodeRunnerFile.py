@@ -38,8 +38,7 @@ class SimulationGrid:
             self.m_rectangle()
         elif _type == 'Circle':
             self.m_circle()
-        self.eigenvalues, self.eigenvectors = np.linalg.eig(self.M)
-        self.eigenfrequencies = np.sqrt(np.abs(self.eigenvalues))
+        self.eigen = np.linalg.eig(self.M)
 
     def m_square(self):
         """
@@ -123,6 +122,9 @@ class SimulationGrid:
         ax.imshow(C, cmap='hot', interpolation='nearest', extent=[0, 1, 0, 1])
 
 
+
+
+
 if __name__ == "__main__":
     dif = SimulationGrid(3)
-    print(dif.eigenvalues)
+    print(dif.eigen)
